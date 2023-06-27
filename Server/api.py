@@ -1,11 +1,14 @@
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 from clarifai_grpc.grpc.api import service_pb2_grpc, resources_pb2, service_pb2
 from clarifai_grpc.grpc.api.status import status_code_pb2
+from google.protobuf.json_format import MessageToJson
 from dotenv import load_dotenv
 import os
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # Load variables from .env file
 load_dotenv()
@@ -27,7 +30,9 @@ metadata = (("authorization", f"Key {PAT}"),)
 
 @app.route("/")
 def home():
-    return 'Nothing to see here.'
+    return jsonify({
+        'test': 'Hello world'
+    })
 
 
 @app.route("/api", methods=['GET'])
@@ -65,8 +70,10 @@ def api():
         print("%s %.2f" % (concept.name, concept.value))
 
     # Uncomment this line to print the full Response JSON
-    return jsonify(output)
+    box = output.data.regions[0].region_info.bounding_box
+    json_obj = MessageToJson(box)
+    return json_obj
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8080)

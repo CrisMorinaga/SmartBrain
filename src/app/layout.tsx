@@ -13,8 +13,8 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
   return (
-    <html suppressHydrationWarning={true} lang="en">
-        <body className={`${inter.className} bg-gradient-to-l from-project-boxes-border to-project-lighter-magenta`}>{children}</body>
+    <html lang="en">
+        <body suppressHydrationWarning={true} className={`${inter.className} bg-gradient-to-l from-project-boxes-border to-project-lighter-magenta`}>{children}</body>
     </html>
   )
 }

@@ -1,13 +1,15 @@
 'use client'
 
 type Props = {
-    url: string;
+    imgUrl: string | null
   };
 
-export function FaceRecognition({url}: Props) {
+export function FaceRecognition({imgUrl}: Props) {
     return (
-        <div className="center">
-            <img width={'250px'} className="" src={url} alt="" />
+        <div className="center m-4">
+            <div className="shadow-lg">
+                <img width={'300px'} height={'auto'} className="rounded-lg" src={imgUrl} alt="" />
+            </div>
         </div>
     )
 }

@@ -3,11 +3,12 @@
 import { useState } from "react"
 
 type Props = {
-    handleUrlChange: (url: string) => void
+    onInputChange: (event: string) => void,
+    onSubmit: (url: string) => void
 }
 
 
-export function ImageLinkForm ({handleUrlChange}: Props) {
+export function ImageLinkForm ({onInputChange, onSubmit}: Props) {
 
     const [name, setName] = useState('')
     const placeHolder = 'Enter an image url'
@@ -29,19 +30,11 @@ export function ImageLinkForm ({handleUrlChange}: Props) {
                         />
                         
                         <button
-                        onClick={() => handleUrlChange(name)}
+                        onClick={(e) => onSubmit(name)}
                         className="project-button text-base grow
                         my-3 mx-3 p-2">
                         Detect
                         </button>
-
-                        {
-                            name.length > 2 ? <p 
-                            className=" text-project-text-color text-center">
-                                Your image is being loaded
-                                </p> : <></>
-                        }
-
                     </div>
                 </div>
             </div>
