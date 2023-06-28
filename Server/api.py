@@ -72,6 +72,7 @@ def api():
     # Uncomment this line to print the full Response JSON
     box = output.data.regions[0].region_info.bounding_box
     json_obj = MessageToJson(box)
+    print(json_obj)
     return json_obj
 
 

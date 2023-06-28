@@ -13,16 +13,33 @@ type MyProps = {}
 type MyState = {
     input: string,
     imageUrl: string,
-    box: {}
+    box: Data | {}
+}
+
+interface Data {
+    topRow: number,
+    leftCol: number,
+    bottomRow: number,
+    rightCol: number
 }
 
 const flaskImgDataApi = 'http://localhost:8080/api?url='
 
 async function getDataFromApi(url:string) {
-    const response = await fetch(flaskImgDataApi + url);
-    const data = await response.json();
-    console.log(data)
-}
+    try{
+        const response = await fetch(flaskImgDataApi + url);
+        const data = await response.json();
+        if (data) {
+            return data as Data
+        } else {
+            throw new Error('Invalid data')
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+    
+}   
 
 class App extends Component <MyProps, MyState>{
     constructor(props: MyProps) {
@@ -34,13 +51,41 @@ class App extends Component <MyProps, MyState>{
         }
     }
 
+    calculateFaceLocation = (data: any) => {
+        const clarifaiFace = data;
+        console.log(clarifaiFace)
+        const image = document.getElementById('inputimage') as HTMLCanvasElement;
+        const width = image.width;
+        const height = image.height;
+        console.log(width, height)
+        return {
+            leftCol: clarifaiFace.leftCol * width,
+            topRow: clarifaiFace.topRow * height,
+            rightCol: width - (clarifaiFace.rightCol * width),
+            bottomRow: height - (clarifaiFace.bottomRow * height)
+        }
+    }
+
+    displayFaceBox = (box: Data) => {
+        this.setState({box: box});
+    }
+
     onInputChange = (event: any) => {
         // console.log(event.target.value)
     }
 
-    onSubmit = (url: string) => {
+    onSubmit = async (url: string) => {
         this.setState({imageUrl: url})
-        getDataFromApi(url)
+        try{
+            const data = await getDataFromApi(url)
+            const boxSizes = await this.calculateFaceLocation(data)
+            this.displayFaceBox(boxSizes)
+
+        } catch {
+            console.log('Server error')
+        }
+        
+        
     }
 
     render() {
@@ -57,8 +102,8 @@ class App extends Component <MyProps, MyState>{
                      />
 
                     {(this.state.imageUrl.length === 0)? 
-                    <FaceRecognition imgUrl={null}/>:
-                    <FaceRecognition imgUrl={this.state.imageUrl}/>}
+                    <FaceRecognition box={this.state.box} imgUrl={null}/>:
+                    <FaceRecognition box={this.state.box} imgUrl={this.state.imageUrl}/>}
                 </div>  
             </>
         )
