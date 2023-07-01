@@ -1,36 +1,38 @@
 'use client'
 
 import { ImageLinkForm } from "./components/ImageLinkForm/ImageLinkForm";
-import { Logo } from "./components/Logo/Logo";
-import { Navigation } from "./components/Navigation/Navigation";
 import { Rank } from "./components/Rank/Rank";
-import Particle from "./components/Particle/Particle"
 import { FaceRecognition } from "./components/FaceRecognition/FaceRecognition";
-import React, { Component} from "react";
+import React from "react";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import axios from "@/library/axios";
 
-type MyProps = {}
 
-type MyState = {
-    input: string,
-    imageUrl: string,
-    box: Data | {}
-}
 
-interface Data {
+type Data = {
     topRow: number,
     leftCol: number,
     bottomRow: number,
     rightCol: number
-}
-
-const flaskImgDataApi = 'http://localhost:8080/api?url='
+};
 
 async function getDataFromApi(url:string) {
     try{
-        const response = await fetch(flaskImgDataApi + url);
-        const data = await response.json();
-        if (data) {
-            return data as Data
+
+        const response = await axios({
+            method: "GET",
+            url: '/api',
+            params: {
+                url: url
+            }
+            // headers: {
+            //   Authorization: 'Bearer ' + token
+            // }
+          })
+        const data: Data[] = await response.data;
+        if (data !== undefined) {
+            return data
         } else {
             throw new Error('Invalid data')
         }
@@ -38,76 +40,81 @@ async function getDataFromApi(url:string) {
     catch (error) {
         console.log(error)
     }
-    
 }   
 
-class App extends Component <MyProps, MyState>{
-    constructor(props: MyProps) {
-        super(props);
-        this.state = {
-            input: '',
-            imageUrl: '',
-            box: {}
-        }
-    }
 
-    calculateFaceLocation = (data: any) => {
-        const clarifaiFace = data;
-        console.log(clarifaiFace)
+export default function App() {
+
+    const [imageUrl, setImageUrl] = useState('');
+    const [box, setBox] = useState([]);
+    const { data: session } = useSession()
+
+    const calculateFaceLocation = (data: any) => {
         const image = document.getElementById('inputimage') as HTMLCanvasElement;
-        const width = image.width;
-        const height = image.height;
-        console.log(width, height)
-        return {
-            leftCol: clarifaiFace.leftCol * width,
-            topRow: clarifaiFace.topRow * height,
-            rightCol: width - (clarifaiFace.rightCol * width),
-            bottomRow: height - (clarifaiFace.bottomRow * height)
+        
+        if (Array.isArray(data)) {
+            const clarifaiFace = data.map((jsonString: any) => JSON.parse(jsonString));
+            
+            const positionArray = clarifaiFace.map((obj: Data) => {
+                const width = image.width;
+                const height = image.height;
+
+                return {
+                    leftCol: obj.leftCol * width,
+                    topRow: obj.topRow * height,
+                    rightCol: width - (obj.rightCol * width),
+                    bottomRow: height - (obj.bottomRow * height)
+                }
+            });
+
+            return positionArray as Data[]
+        } else {
+            const width = image.width;
+            const height = image.height;
+
+            return {
+                leftCol: data.leftCol * width,
+                topRow: data.topRow * height,
+                rightCol: width - (data.rightCol * width),
+                bottomRow: height - (data.bottomRow * height)
+            }
         }
     }
 
-    displayFaceBox = (box: Data) => {
-        this.setState({box: box});
+    const displayFaceBox = (box: any) => {
+        setBox(box)
     }
 
-    onInputChange = (event: any) => {
-        // console.log(event.target.value)
-    }
-
-    onSubmit = async (url: string) => {
-        this.setState({imageUrl: url})
+    const onSubmit = async (url: string) => {
+        setImageUrl(url)
+        setBox([])
         try{
-            const data = await getDataFromApi(url)
-            const boxSizes = await this.calculateFaceLocation(data)
-            this.displayFaceBox(boxSizes)
+            const request = await getDataFromApi(url)
+            if (request !== undefined) {
+                const boxSizes = await calculateFaceLocation(request)
+                const putBoxOnImage = await displayFaceBox(boxSizes)
+            }
 
         } catch {
-            console.log('Server error')
+            console.log(`Couldn't proccess url image, please check if the url is correct and try again.`)
         }
         
         
     }
 
-    render() {
-        return (  
-            <>
-                <Particle />
-                <div className="App">
-                    <Navigation />
-                    <Logo />    
+    return (  
+        <>
+            <div className="App">
+                <div className="mt-5">
                     <Rank />
                     <ImageLinkForm 
-                    onInputChange={this.onInputChange}
-                    onSubmit={this.onSubmit}
-                     />
-
-                    {(this.state.imageUrl.length === 0)? 
-                    <FaceRecognition box={this.state.box} imgUrl={null}/>:
-                    <FaceRecognition box={this.state.box} imgUrl={this.state.imageUrl}/>}
-                </div>  
-            </>
-        )
-    }
+                    onSubmit={onSubmit}
+                    />
+                    {(imageUrl.length === 0)? 
+                    <FaceRecognition box={box} imgUrl={''}/>:
+                    <FaceRecognition box={box} imgUrl={imageUrl}/>}
+                </div>
+            </div>  
+        </>
+    )
 }
-
-export default App

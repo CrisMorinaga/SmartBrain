@@ -3,12 +3,11 @@
 import { useState } from "react"
 
 type Props = {
-    onInputChange: (event: string) => void,
     onSubmit: (url: string) => void
 }
 
 
-export function ImageLinkForm ({onInputChange, onSubmit}: Props) {
+export function ImageLinkForm ({onSubmit}: Props) {
 
     const [name, setName] = useState('')
     const placeHolder = 'Enter an image url'

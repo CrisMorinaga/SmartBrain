@@ -1,79 +1,88 @@
-from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
-from clarifai_grpc.grpc.api import service_pb2_grpc, resources_pb2, service_pb2
-from clarifai_grpc.grpc.api.status import status_code_pb2
-from google.protobuf.json_format import MessageToJson
 from dotenv import load_dotenv
+from apibrain import ApiBrain
 import os
-from flask import Flask, jsonify, request
-from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app)
+from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
+from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
+                               unset_jwt_cookies, jwt_required, JWTManager
+import json
+from datetime import datetime, timedelta, timezone
 
 # Load variables from .env file
 load_dotenv()
 
-stub = service_pb2_grpc.V2Stub(ClarifaiChannel.get_grpc_channel())
+# Flask config
+app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+CORS(app)
+jwt = JWTManager(app)
 
-# Your PAT (Personal Access Token) can be found in the portal under Authentification
-PAT = os.getenv('CLARIFAI_PAT')
-# Specify the correct user_id/app_id pairings
-# Since you're making inferences outside your app's scope
-USER_ID = os.getenv('USER_ID')
-APP_ID = os.getenv('APP_ID')
-# Change these to whatever model and image URL you want to use
-MODEL_ID = os.getenv('MODEL_ID')
-
-# This is how you authenticate.
-metadata = (("authorization", f"Key {PAT}"),)
+brain = ApiBrain()
 
 
-@app.route("/")
-def home():
-    return jsonify({
-        'test': 'Hello world'
-    })
+@app.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            data = response.get_json()
+            if type(data) is dict:
+                data["access_token"] = access_token
+                response.data = json.dumps(data)
+        return response
+    except (RuntimeError, KeyError):
+        # Case where there is not a valid JWT. Just return the original response
+        return response
+
+
+@app.route("/login", methods=['POST'])
+def create_login_token():
+    name = request.json.get('username', None)
+    password = request.json.get("password", None)
+    if name != "test" or password != '12345678':
+        return {"msg": "Wrong email or password"}, 401
+
+    access_token = create_access_token(identity=name)
+    response = {
+        "id": 1,
+        "name": name,
+        "access_token": access_token
+    }
+    return response
+
+
+@app.route("/logout", methods=['POST'])
+def logout():
+    response = jsonify({"msg": "logout successful"})
+    unset_jwt_cookies(response)
+    return response
+
+
+@app.route('/profile', methods=['POST'])
+@jwt_required()
+def my_profile():
+    user_role = request.json.get('id')
+    if user_role == 1:
+        response_body = {
+            "name": "Nagato",
+            "about": "Hello! I'm a full stack developer that loves python and javascript"
+        }
+        return response_body
+    else:
+        return {"msg": "You don't have permission to see this"}, 401
 
 
 @app.route("/api", methods=['GET'])
+@cross_origin()
 def api():
     url = request.args.get('url')
-
-    user_data_object = resources_pb2.UserAppIDSet(user_id=USER_ID, app_id=APP_ID)
-    post_model_outputs_response = stub.PostModelOutputs(
-        service_pb2.PostModelOutputsRequest(
-            user_app_id=user_data_object,
-            # The userDataObject is created in the overview and is required when using a PAT
-            model_id=MODEL_ID,
-            # version_id=MODEL_VERSION_ID,  # This is optional. Defaults to the latest model version
-            inputs=[
-                resources_pb2.Input(
-                    data=resources_pb2.Data(
-                        image=resources_pb2.Image(
-                            url=url
-                        )
-                    )
-                )
-            ]
-        ),
-        metadata=metadata
-    )
-    if post_model_outputs_response.status.code != status_code_pb2.SUCCESS:
-        print(post_model_outputs_response.status)
-        raise Exception("Post model outputs failed, status: " + post_model_outputs_response.status.description)
-
-    # Since we have one input, one output will exist here
-    output = post_model_outputs_response.outputs[0]
-
-    print("Predicted concepts:")
-    for concept in output.data.concepts:
-        print("%s %.2f" % (concept.name, concept.value))
-
-    # Uncomment this line to print the full Response JSON
-    box = output.data.regions[0].region_info.bounding_box
-    json_obj = MessageToJson(box)
-    print(json_obj)
-    return json_obj
+    data = brain.make_api_call(url)
+    return data
 
 
 if __name__ == '__main__':
