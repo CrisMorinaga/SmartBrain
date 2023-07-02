@@ -26,9 +26,6 @@ async function getDataFromApi(url:string) {
             params: {
                 url: url
             }
-            // headers: {
-            //   Authorization: 'Bearer ' + token
-            // }
           })
         const data: Data[] = await response.data;
         if (data !== undefined) {

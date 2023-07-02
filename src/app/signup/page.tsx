@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect } from "react";
-import { Signin } from "@/app/components/Signin/Signin";
+import { Signup } from "../components/Signup/Signup";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -18,7 +18,7 @@ export default function logIn() {
     return (  
         <>
             <div className="Signin">
-                <Signin />
+                <Signup />
             </div>  
         </>
     )

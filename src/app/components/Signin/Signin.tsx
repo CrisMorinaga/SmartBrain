@@ -17,39 +17,42 @@ import {
 } from "@/app/components/ui/form"
 import { Input } from "@/app/components/ui/input"
 import { Button } from "@/app/components/ui/button"
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 // import { Checkbox } from "@/app/components/ui/checkbox"
 // TODO: Create a checkbox with 'remember me' option.
 
  
 const formSchema = z.object({
-  username: z.string().min(2,{message: 'Username must be between 2 and 20 characters long.'}).max(20),
+  username: z.string().min(2,{message: 'Username must be between 2 and 40 characters long.'}).max(40),
     // message: 'test' // This is the error message that appears on the screen (Uses default if not specified)
-  password: z.string().min(8, {message: 'Passwords must have 8 characters or more'}),
+  password: z.string().min(8, {message: 'Passwords must be at least 8 characters long'}),
 //   mobile: z.boolean().default(false).optional(),
   
 })
 
 export function Signin() {
     // 1. Define your form.
+
     const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: {
         username: "",
         password: "",
-        // mobile: true,
       },
     })
-   
+
+    
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const result = await signIn("credentials", {
             username: values.username,
             password: values.password,
-            redirect:true,
-            callbackUrl: `/profile/${values.username}`
-        })
-    }
+            // redirect:true,
+            // callbackUrl: `/profile/${values.username}`
+        });
+    };
 
     return (
         <div className="container mt-20">
