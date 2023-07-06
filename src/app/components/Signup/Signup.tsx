@@ -4,8 +4,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { useForm } from "react-hook-form"
-import hide from "./hide.png"
-import show from "./show.png"
+import { useState } from "react"
+
+import Image from 'next/image'
+import hide from './hide.png'
+import show from './show.png'
 
 // Ui
 import {
@@ -16,36 +19,39 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/app/components/ui/form"
-import { Input } from "@/app/components/ui/input"
-import { Button } from "@/app/components/ui/button"
+} from "@/app/components/shadcn-ui/form"
+import { Input } from "@/app/components/shadcn-ui/input"
+import { Button } from "@/app/components/shadcn-ui/button"
 import { signIn } from "next-auth/react"
 import axios from "@/library/axios"
-import { useState } from "react"
-// import { Checkbox } from "@/app/components/ui/checkbox"
-// TODO: Create a checkbox with 'remember me' option.
+
 
  
 const formSchema = z.object({
 
-    firstName: z.string().max(30),
-    lastName: z.string().max(30),
+    firstName: z.string().max(30, {message: `Please don't go over 30 characters`}),
+    lastName: z.string().max(30, {message: `Please don't go over 30 characters`}),
     email: z.string().email(),
     username: z.string().min(2,{message: 'Username must be between 2 and 20 characters long.'}).max(20),
     password: z.string().min(8, {message: 'Passwords must have 8 characters or more'}),
-    confirmPassword: z.string().min(8)
+    confirmPassword: z.string(),
+    passwordsDontMatch: z.string()
 
 }).superRefine(({ confirmPassword, password}, ctx) => {
     if (confirmPassword !== password) {
         ctx.addIssue({
             code: 'custom',
             message: "The passwords don't match",
-            path: ['confirmPassword']
+            path: ['passwordsDontMatch']
         })
     }
 })
 
-export function Signup() {
+type Props = {
+    catchError: () => void
+}
+
+export function Signup({catchError}:Props) {
 
     const [ showPassword, setShowPassword ] = useState(false);
 
@@ -62,34 +68,38 @@ export function Signup() {
             email: "",
             username: "",
             password: "",
-            confirmPassword: ""
+            confirmPassword: "",
+            passwordsDontMatch: ""
         },
     })
    
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof formSchema>) {
 
-        const register = await axios.post('/register', {
-            firstName: values.firstName,
-            lastName: values.lastName,
-            username: values.username,
-            email: values.email,
-            password: values.password
-        })
+        try {
+            const register = await axios.post('/register', {
+                firstName: values.firstName,
+                lastName: values.lastName,
+                username: values.username,
+                email: values.email,
+                password: values.password
 
-        console.log(register.data)
+                
+            })
 
-        const result = await signIn("credentials", {
-            username: values.username,
-            password: values.password,
-            redirect:true,
-            callbackUrl: `/profile/${values.username}`
-        })
-
+            const result = await signIn("credentials", {
+                username: values.username,
+                password: values.password,
+            })
+        } catch (error) {
+            console.log(`error: `, error);
+            catchError();
+            return
+        }
     }
-
+    // TODO: Fix error messages on password that are overlapping when passwords are not the same and are less than 8 characters long.
     return (
-        <div className="container my-10 ">
+        <div className="container my-10">
             <div className="center">
                 <div className="w-[400px] border rounded m-4 bg-project-boxes">
                     <Form {...form}>
@@ -153,7 +163,7 @@ export function Signup() {
                                 </FormItem>
                             )}
                             />
-                            <div className="flex gap-3 items-center ">
+                            <div className="flex gap-1 place-items-end">
                                 <FormField
                                 control={form.control}
                                 name="password"
@@ -184,38 +194,20 @@ export function Signup() {
                                     </FormItem>
                                 )}
                                 />
-                                {/* <p 
-                                onClick={togglePasswordVisibility}
-                                className="cursor-pointer text-white border rounded text-center">
-                                    {showPassword ? 'Hide Password' : 'Show Password'}
-                                </p> */}
-                            </div>
-
-                            {/* Checkbox(Rememeber me) */}
-                            {/* <FormField
-                                control={form.control}
-                                name="mobile"
-                                render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                <FormControl>
-                                    <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
+                                    <Image
+                                    height={30}
+                                    className="cursor-pointer border rounded bg-white mb-1"
+                                    onClick={togglePasswordVisibility} 
+                                    src={showPassword ? hide : show} alt=''
                                     />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                    <FormLabel>
-                                    Use different settings for my mobile devices
-                                    </FormLabel>
-                                    <FormDescription>
-                                    You can manage your mobile notifications in the{" "}
-                                    <Link href="/examples/forms">mobile settings</Link> page.
-                                    </FormDescription>
-                                </div>
-                                </FormItem>
+                            </div>
+                            <FormField
+                            control={form.control}
+                            name="passwordsDontMatch"
+                            render={() => (
+                                <FormMessage style={{marginTop: 8}} />
                             )}
-                            /> */}
-
+                            />
                             <Button type="submit">Sign up</Button>
                         </form>
                     </Form>

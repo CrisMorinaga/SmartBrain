@@ -1,0 +1,10 @@
+clarifai_grpc==9.5.0
+Flask==2.3.2
+Flask_Cors==4.0.0
+Flask_JWT_Extended==4.5.2
+Flask_Login==0.6.2
+flask_sqlalchemy==3.0.5
+python-dotenv==1.0.0
+SQLAlchemy==2.0.18
+Werkzeug==2.3.6
+gunicorn==20.1.0

@@ -1,4 +1,3 @@
-
 from apibrain import ApiBrain
 
 from dotenv import load_dotenv
@@ -11,12 +10,11 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 
 from flask_cors import CORS, cross_origin
-from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
+from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
 
 from flask_jwt_extended import create_access_token, unset_jwt_cookies, jwt_required
 from flask_jwt_extended import get_jwt, get_jwt_identity, JWTManager
 from werkzeug.security import generate_password_hash, check_password_hash
-
 
 import json
 from datetime import datetime, timedelta, timezone
@@ -48,25 +46,27 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(250), nullable=False, unique=True)
     password_hash = db.Column(db.String(250), nullable=False)
     profile_img = db.Column(db.String(250), nullable=True)
-    # posts = relationship("BlogPost", back_populates="author")
-    # comments = relationship('Comment', back_populates='author')
+    date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    searches = relationship("NumberOfSearches", back_populates="user")
 
 
 class NumberOfSearches(db.Model):
     __tablename__ = 'Searches_done'
     id = db.Column(db.Integer, primary_key=True)
-    searches = db.Column(db.Integer, nullable=False)
-    # posts = relationship("BlogPost", back_populates="author")
-    # comments = relationship('Comment', back_populates='author')
+    user_id = db.Column(db.Integer, db.ForeignKey("Users.id"))
+    search_url = db.Column(db.String(250))
+    date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="searches")
 
 
 # Configure login manager
 login_manager = LoginManager()
-login_manager.login_view = "login"
-login_manager.login_message = 'Invalid. Please login in to access that page.'
 login_manager.init_app(app)
 
-# # Create tables on db
+# TODO: Remember to erase this code for deployment
+# Create tables on db
 # with app.app_context():
 #     db.create_all()
 
@@ -110,6 +110,7 @@ def register():
         new_user = User(name=name, username=username.lower(), email=email, password_hash=hashed_password)
         db.session.add(new_user)
         db.session.commit()
+        login_user(new_user, remember=True)
 
         response = {
             "message": "User created successfully"
@@ -121,7 +122,7 @@ def register():
 
 @app.route("/login", methods=['POST'])
 def handle_login():
-    username = request.json.get('username')
+    username = request.json.get('username').lower()
     password = request.json.get("password")
 
     user = User.query.filter(or_(User.username == username, User.email == username)).first()
@@ -131,20 +132,35 @@ def handle_login():
     else:
         if check_password_hash(pwhash=user.password_hash, password=password):
             access_token = create_access_token(identity=username)
-            login_user(user, remember=True)
 
-            response = {
-                "id": user.id,
-                "name": user.name.title(),
-                "username": user.username.title(),
-                "email": user.email,
-                "access_token": access_token
-            }
-            return response
+            if not current_user.is_authenticated:
+                login_user(user, remember=True)
+
+            if not user.searches:
+                response = {
+                    "id": user.id,
+                    "name": user.name.title(),
+                    "username": user.username.title(),
+                    "email": user.email,
+                    "access_token": access_token,
+                    "total_searches": 0,
+                    "profile_picture": user.profile_img
+                }
+                return response
+            else:
+                response = {
+                    "id": user.id,
+                    "name": user.name.title(),
+                    "username": user.username.title(),
+                    "email": user.email,
+                    "access_token": access_token,
+                    "total_searches": NumberOfSearches.query.filter_by(user_id=user.id).count(),
+                    "profile_picture": user.profile_img
+                }
+                return response
 
 
 @app.route("/logout", methods=['POST'])
-@jwt_required()
 def logout():
     response = jsonify({"msg": "logout successful"})
     logout_user()
@@ -152,18 +168,35 @@ def logout():
     return response
 
 
+@app.route("/add-search-to-data", methods=['POST'])
+@jwt_required()
+def handle_ranking():
+    user_id = request.json.get('id')
+    user_url = request.json.get('url')
+
+    user = User.query.filter_by(id=user_id).first()
+
+    if user:
+        search_table = NumberOfSearches(search_url=user_url, user=user)
+        db.session.add(search_table)
+        db.session.commit()
+
+        total_rows = NumberOfSearches.query.filter_by(user_id=user_id).count()
+        return {
+            "total_searches": total_rows
+        }
+
+
 @app.route('/profile', methods=['POST'])
 @jwt_required()
 def profile():
-    user_role = request.json.get('id')
-    print(user_role)
-    if user_role == 1:
-        response_body = {
-            "urls": ["Nagatoro", "Momo", "Azunyan", "Kairi", "Hatsune Miku"]
-        }
-        return response_body
-    else:
-        return {"msg": "You don't have permission to see this"}, 401
+    # TODO: Finish profile
+    user_id = request.json.get('id')
+    searches = NumberOfSearches.query.filter_by(user_id=user_id).count()
+    response_body = {
+        "urls": ["Nagatoro", "Momo", "Azunyan", "Kairi", "Hatsune Miku"],
+    }
+    return response_body
 
 
 @app.route("/api", methods=['GET'])

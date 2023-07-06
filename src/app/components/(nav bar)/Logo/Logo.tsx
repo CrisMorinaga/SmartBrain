@@ -10,7 +10,7 @@ export function Logo ({router}: Props) {
 
     return (
         <>
-            <div className="m-4">
+            <div className="ml-4 my-2">
                 <Tilt>
                     <div style={{ height: 'auto', width: '50px'}}>
                         <Image 

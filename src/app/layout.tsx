@@ -3,12 +3,17 @@ import Particle from './components/Particle/Particle'
 import { Provider } from './components/Provider/Provider'
 import './globals.css'
 import { Inter } from 'next/font/google'
+import { Toaster } from "@/app/components/shadcn-ui/toaster"
+
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-title: 'SmartBrain',
-}
+    title: 'SmartBrain',
+    icons: {
+        icon: '/icon.png',
+    },
+};
 
 export default function RootLayout({ children }:  { children: React.ReactNode})  {
 
@@ -19,6 +24,7 @@ export default function RootLayout({ children }:  { children: React.ReactNode}) 
                 <Navigation/>
                 <Particle/>
                 {children}
+                <Toaster />
             </Provider>
 
             </body>

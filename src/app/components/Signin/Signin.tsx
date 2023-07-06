@@ -14,14 +14,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/app/components/ui/form"
-import { Input } from "@/app/components/ui/input"
-import { Button } from "@/app/components/ui/button"
-import { signIn, useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
-// import { Checkbox } from "@/app/components/ui/checkbox"
-// TODO: Create a checkbox with 'remember me' option.
+} from "@/app/components/shadcn-ui/form"
+import { Input } from "@/app/components/shadcn-ui/input"
+import { Button } from "@/app/components/shadcn-ui/button"
+import { signIn } from "next-auth/react"
 
  
 const formSchema = z.object({
@@ -32,7 +28,11 @@ const formSchema = z.object({
   
 })
 
-export function Signin() {
+type Props = {
+    catchError: () => void
+}
+
+export function Signin({catchError}: Props) {
     // 1. Define your form.
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -43,16 +43,17 @@ export function Signin() {
       },
     })
 
-    
     // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const result = await signIn("credentials", {
             username: values.username,
             password: values.password,
-            // redirect:true,
-            // callbackUrl: `/profile/${values.username}`
+            redirect:false,
         });
-    };
+        if (result?.error?.includes('404')) {
+            catchError()
+        } 
+    }
 
     return (
         <div className="container mt-20">
@@ -93,32 +94,6 @@ export function Signin() {
                                 </FormItem>
                             )}
                             />
-
-                            {/* Checkbox(Rememeber me) */}
-                            {/* <FormField
-                                control={form.control}
-                                name="mobile"
-                                render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                <FormControl>
-                                    <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                    />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                    <FormLabel>
-                                    Use different settings for my mobile devices
-                                    </FormLabel>
-                                    <FormDescription>
-                                    You can manage your mobile notifications in the{" "}
-                                    <Link href="/examples/forms">mobile settings</Link> page.
-                                    </FormDescription>
-                                </div>
-                                </FormItem>
-                            )}
-                            /> */}
-
                             <Button type="submit">Login</Button>
                         </form>
                     </Form>

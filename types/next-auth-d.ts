@@ -7,7 +7,9 @@ declare module "next-auth"{
             name: string,
             username: string,
             email: string,
-            access_token: string
+            access_token: string,
+            total_searches: number,
+            profile_picture: string
         }
     }
 }

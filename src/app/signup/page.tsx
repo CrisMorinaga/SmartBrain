@@ -1,13 +1,28 @@
 'use client'
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Signup } from "../components/Signup/Signup";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { toast } from "../components/shadcn-ui/use-toast";
 
 export default function logIn() {
 
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const router = useRouter();
+    const [error, setError] = useState(false)
+
+    const catchError = () => {
+        setError(true)
+    }
+
+    useEffect(() => {
+        if (error) {
+            toast({
+                variant: "destructive",
+                description: "That username already exists in our database. Try with another one.",
+                })
+        } setError(false);
+    }, [error])
 
     useEffect(() => {
         if (session) {
@@ -16,10 +31,12 @@ export default function logIn() {
     }, [session, router])
 
     return (  
-        <>
-            <div className="Signin">
-                <Signup />
-            </div>  
+        <>{status === 'loading'
+        ?<></>
+        :<div className="Signin">
+            <Signup catchError={catchError}/>
+        </div>  
+        }
         </>
     )
 }

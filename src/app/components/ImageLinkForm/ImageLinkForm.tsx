@@ -1,16 +1,52 @@
 'use client'
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import * as z from "zod"
+
 
 type Props = {
-    onSubmit: (url: string) => void
+    onSubmit: (url: string) => void,
+    setErrorBackToFalse: () => void,
+    setErrorTrue: () => void,
+    error: boolean
 }
 
+const mySchema = z.string().url()
 
-export function ImageLinkForm ({onSubmit}: Props) {
+export function ImageLinkForm ({onSubmit, setErrorBackToFalse, setErrorTrue, error}: Props) {
 
-    const [name, setName] = useState('')
-    const placeHolder = 'Enter an image url'
+    const placeHolder = 'Enter an image url';
+    const [name, setName] = useState('');
+    const prevNameRef = useRef('');
+
+    useEffect(() => {
+        if (error) {
+            prevNameRef.current = name
+        }
+    }, [error])
+
+    useEffect(() => {
+        if (prevNameRef.current !== name && error) {
+            setErrorBackToFalse();
+        };
+    }, [name, error])
+
+    const handleNameChange = (name: string) => {
+        const validationResult = mySchema.safeParse(name);
+
+        if (validationResult.success) {
+            onSubmit(name)
+        } else {
+            // Not a valid url
+            setErrorTrue()
+        }
+    }
+
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            handleNameChange(name)
+        }
+    }
 
     return (
         <>
@@ -18,18 +54,19 @@ export function ImageLinkForm ({onSubmit}: Props) {
                 <p className="text-lg text-project-light-blue text-center">
                     {'This Magic Brain will detect faces in your pictures. Give it a try.'}
                 </p>
-                <div className="center">
+                <div className="container center">
                     <div className="border border-project-text-color mt-3 rounded shadow-lg">
                         <input 
-                        value={name} 
-                        onChange={e => setName(e.target.value)}
-                        placeholder={placeHolder}
-                        className="w-72 ml-3 rounded" 
-                        type="text" 
+                            value={name} 
+                            onChange={e => setName(e.target.value)}
+                            placeholder={placeHolder}
+                            onKeyDown={handleKeyPress}
+                            style={{ paddingLeft: '0.75rem'}}
+                            className=" w-80 ml-3 rounded" 
+                            type="text" 
                         />
-                        
                         <button
-                        onClick={(e) => onSubmit(name)}
+                        onClick={() => handleNameChange(name)}
                         className="project-button text-base grow
                         my-3 mx-3 p-2">
                         Detect
