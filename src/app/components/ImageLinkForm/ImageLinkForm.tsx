@@ -8,20 +8,21 @@ type Props = {
     onSubmit: (url: string) => void,
     setErrorBackToFalse: () => void,
     setErrorTrue: () => void,
+    resetUrl: () => void,
     error: boolean
 }
 
 const mySchema = z.string().url()
 
-export function ImageLinkForm ({onSubmit, setErrorBackToFalse, setErrorTrue, error}: Props) {
+export function ImageLinkForm ({onSubmit, setErrorBackToFalse, setErrorTrue, resetUrl, error}: Props) {
 
-    const placeHolder = 'Enter an image url';
     const [name, setName] = useState('');
     const prevNameRef = useRef('');
 
     useEffect(() => {
         if (error) {
-            prevNameRef.current = name
+            prevNameRef.current = name;
+            resetUrl()
         }
     }, [error])
 
@@ -59,7 +60,7 @@ export function ImageLinkForm ({onSubmit, setErrorBackToFalse, setErrorTrue, err
                         <input 
                             value={name} 
                             onChange={e => setName(e.target.value)}
-                            placeholder={placeHolder}
+                            placeholder="Enter an image url"
                             onKeyDown={handleKeyPress}
                             style={{ paddingLeft: '0.75rem'}}
                             className=" w-80 ml-3 rounded" 

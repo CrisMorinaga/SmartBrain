@@ -47,8 +47,13 @@ export default function App() {
         catch {
             setError(true)
             errorHandler = true
+            setImageUrl('')
         }
     }   
+
+    const resetUrl = () => {
+        setImageUrl('')
+    }
 
     const setErrorTrue = () => {
         setError(true)
@@ -56,6 +61,7 @@ export default function App() {
 
     const setErrorBackToFalse = () => {
         setError(false)
+        errorHandler = false
     }
 
     const calculateFaceLocation = (data: any) => {
@@ -64,6 +70,7 @@ export default function App() {
         if (Array.isArray(data)) {
             const clarifaiFace = data.map((jsonString: any) => JSON.parse(jsonString));
             
+            console.log('clariface: ', clarifaiFace)
             const positionArray = clarifaiFace.map((obj: Data) => {
                 const width = image.width;
                 const height = image.height;
@@ -96,6 +103,8 @@ export default function App() {
 
     const onSubmit = async (url: string) => {
         setImageUrl(url)
+
+        // Resets box on image
         setBox([])
         try{
             const request = await getDataFromApi(url)
@@ -133,14 +142,13 @@ export default function App() {
                 :<div className="mt-5">
                     <Rank />
                     <ImageLinkForm 
+                    resetUrl={resetUrl}
                     setErrorTrue={setErrorTrue}
                     setErrorBackToFalse={setErrorBackToFalse}
                     error={error}
                     onSubmit={onSubmit}
                     />
-                    {(imageUrl.length === 0)? 
-                    <FaceRecognition error={error} box={box} imgUrl={''}/>:
-                    <FaceRecognition error={error} box={box} imgUrl={imageUrl}/>}
+                    <FaceRecognition error={error} box={box} imgUrl={imageUrl}/>
                 </div>
                 }
             </div>  
