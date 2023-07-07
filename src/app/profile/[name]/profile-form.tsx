@@ -1,8 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import * as z from "zod"
 
 import { Button } from "@/app/components/shadcn-ui/button"
@@ -16,60 +15,31 @@ import {
     FormMessage,
 } from "@/app/components/shadcn-ui/form"
 import { Input } from "@/app/components/shadcn-ui/input"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/app/components/shadcn-ui/select"
 import { toast } from "@/app/components/shadcn-ui/use-toast"
 import { useSession } from "next-auth/react"
 
-const profileFormSchema = z.object({
-    username: z
-        .string()
-        .min(2, {
-            message: "Username must be at least 2 characters.",
-        })
-        .max(30, {
+const FormSchema = z.object({
+    username: z.string()
+        .min(2, {message: "Username must be at least 2 characters.",
+        }).max(30, {
             message: "Username must not be longer than 30 characters.",
         }),
-    email: z
-        .string({
-            required_error: "Please select an email to display.",
-        })
-        .email(),
-    bio: z.string().max(160).min(4),
-    urls: z
-        .array(
-            z.object({
-                value: z.string().url({ message: "Please enter a valid URL." }),
-            })
-        )
-        .optional(),
 })
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>
-
-// This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-    urls: [
-        { value: "https://shadcn.com" },
-        { value: "http://twitter.com/shadcn" },
-    ],
-}
+type ProfileFormValues = z.infer<typeof FormSchema>
 
 export function ProfileForm() {
         
     const { data: session } = useSession()
 
     const form = useForm<ProfileFormValues>({
-        resolver: zodResolver(profileFormSchema),
-        defaultValues,
+        resolver: zodResolver(FormSchema),
         mode: "onChange",
+        defaultValues: {
+            username: ""
+        }
     })
-
+    // TODO: Finish onSubmit data requests and search on how to add profile pic
     function onSubmit(data: ProfileFormValues) {
         toast({
             title: "You submitted the following values:",
@@ -83,7 +53,7 @@ export function ProfileForm() {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form method="POST" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <FormField
                     control={form.control}
                     name="username"

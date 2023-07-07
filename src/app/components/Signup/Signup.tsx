@@ -25,15 +25,19 @@ import { Button } from "@/app/components/shadcn-ui/button"
 import { signIn } from "next-auth/react"
 import axios from "@/library/axios"
 
-
  
 const formSchema = z.object({
 
-    firstName: z.string().max(30, {message: `Please don't go over 30 characters`}),
-    lastName: z.string().max(30, {message: `Please don't go over 30 characters`}),
+    firstName: z.string()
+        .max(30, {message: `Please don't go over 30 characters`}),
+    lastName: z.string()
+        .max(30, {message: `Please don't go over 30 characters`}),
     email: z.string().email(),
-    username: z.string().min(2,{message: 'Username must be between 2 and 20 characters long.'}).max(20),
-    password: z.string().min(8, {message: 'Passwords must have 8 characters or more'}),
+    username: z.string()
+        .min(2,{message: 'Username must be between 2 and 20 characters long.'})
+        .max(20, {message: 'Username must be between 2 and 20 characters long.'}),
+    password: z.string()
+        .min(8, {message: 'Passwords must have 8 characters or more'}),
     confirmPassword: z.string(),
     passwordsDontMatch: z.string()
 

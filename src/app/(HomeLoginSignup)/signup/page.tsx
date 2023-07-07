@@ -1,9 +1,9 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import { Signup } from "../components/Signup/Signup";
+import { Signup } from "../../components/Signup/Signup";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { toast } from "../components/shadcn-ui/use-toast";
+import { toast } from "../../components/shadcn-ui/use-toast";
 
 export default function logIn() {
 

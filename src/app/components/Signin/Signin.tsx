@@ -21,11 +21,11 @@ import { signIn } from "next-auth/react"
 
  
 const formSchema = z.object({
-  username: z.string().min(2,{message: 'Username must be between 2 and 40 characters long.'}).max(40),
-    // message: 'test' // This is the error message that appears on the screen (Uses default if not specified)
-  password: z.string().min(8, {message: 'Passwords must be at least 8 characters long'}),
-//   mobile: z.boolean().default(false).optional(),
-  
+    username: z.string()
+        .min(2,{message: 'Username must be between 2 and 40 characters long.'})
+        .max(40),
+    password: z.string()
+        .min(8, {message: 'Passwords must be at least 8 characters long'}),
 })
 
 type Props = {
@@ -36,11 +36,11 @@ export function Signin({catchError}: Props) {
     // 1. Define your form.
 
     const form = useForm<z.infer<typeof formSchema>>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        username: "",
-        password: "",
-      },
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            username: "",
+            password: "",
+        },
     })
 
     // 2. Define a submit handler.

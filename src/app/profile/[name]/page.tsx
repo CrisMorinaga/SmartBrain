@@ -10,6 +10,7 @@ export default function SettingsProfilePage() {
           This is how others will see you on the site.
         </p>
       </div>
+      // TODO: Set img upload to change profile pict
       <Separator />
       <ProfileForm />
     </div>

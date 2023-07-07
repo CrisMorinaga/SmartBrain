@@ -1,17 +1,17 @@
 'use client'
 
-import { ImageLinkForm } from "./components/ImageLinkForm/ImageLinkForm";
-import { Rank } from "./components/Rank/Rank";
-import { FaceRecognition } from "./components/FaceRecognition/FaceRecognition";
+import { ImageLinkForm } from "../components/ImageLinkForm/ImageLinkForm";
+import { Rank } from "../components/Rank/Rank";
+import { FaceRecognition } from "../components/FaceRecognition/FaceRecognition";
 import React from "react";
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import axios from "@/library/axios";
 import useAxiosAuth from "@/library/hooks/useAxiosAuth";
 import * as z from "zod"
-import { toast } from "./components/shadcn-ui/use-toast";
+import { toast } from "../components/shadcn-ui/use-toast";
 import { AxiosError } from "axios";
-import { ToastAction } from "./components/shadcn-ui/toast";
+import { ToastAction } from "../components/shadcn-ui/toast";
 
 
 
