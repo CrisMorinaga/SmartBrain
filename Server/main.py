@@ -26,6 +26,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+# TODO: Check token refresh
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 CORS(app)
 jwt = JWTManager(app)
@@ -168,7 +169,7 @@ def logout():
     return response
 
 
-@app.route("/add-search-to-data", methods=['POST'])
+@app.route("/add-search-to-data", methods=['PATCH'])
 @jwt_required()
 def handle_ranking():
     user_id = request.json.get('id')
@@ -192,9 +193,11 @@ def handle_ranking():
 def profile():
     # TODO: Finish profile
     user_id = request.json.get('id')
-    searches = NumberOfSearches.query.filter_by(user_id=user_id).count()
+    searches = NumberOfSearches.query.filter_by(user_id=user_id).all()
+    search_list = [search.search_url for search in searches]
+
     response_body = {
-        "urls": ["Nagatoro", "Momo", "Azunyan", "Kairi", "Hatsune Miku"],
+        "urls": search_list,
     }
     return response_body
 
