@@ -5,9 +5,14 @@ import { Rank } from "./components/Rank/Rank";
 import { FaceRecognition } from "./components/FaceRecognition/FaceRecognition";
 import React from "react";
 import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import axios from "@/library/axios";
 import useAxiosAuth from "@/library/hooks/useAxiosAuth";
+import * as z from "zod"
+import { toast } from "./components/shadcn-ui/use-toast";
+import { AxiosError } from "axios";
+import { ToastAction } from "./components/shadcn-ui/toast";
+
 
 
 type Data = {
@@ -16,6 +21,14 @@ type Data = {
     bottomRow: number,
     rightCol: number
 };
+
+const mySchema = z.object({
+    topRow: z.number(),
+    leftCol: z.number(),
+    bottomRow: z.number(),
+    rightCol: z.number()
+})
+
 
 export default function App() {
 
@@ -65,12 +78,11 @@ export default function App() {
     }
 
     const calculateFaceLocation = (data: any) => {
+
         const image = document.getElementById('inputimage') as HTMLCanvasElement;
-        // TODO: Set error catching for missing side on box
         if (Array.isArray(data)) {
             const clarifaiFace = data.map((jsonString: any) => JSON.parse(jsonString));
             
-            console.log('clariface: ', clarifaiFace)
             const positionArray = clarifaiFace.map((obj: Data) => {
                 const width = image.width;
                 const height = image.height;
@@ -85,14 +97,26 @@ export default function App() {
 
             return positionArray as Data[]
         } else {
-            const width = image.width;
-            const height = image.height;
 
-            return {
-                leftCol: data.leftCol * width,
-                topRow: data.topRow * height,
-                rightCol: width - (data.rightCol * width),
-                bottomRow: height - (data.bottomRow * height)
+            const validationResult = mySchema.safeParse(data)
+            if (validationResult.success) {
+                const width = image.width;
+                const height = image.height;
+
+                return {
+                    leftCol: data.leftCol * width,
+                    topRow: data.topRow * height,
+                    rightCol: width - (data.rightCol * width),
+                    bottomRow: height - (data.bottomRow * height)
+                }
+            } else {
+                toast({
+                    variant: "destructive",
+                    description: "Uh oh! There seems to be a problem with that image. Try with a new one.",
+                    })
+                setError(true)
+                errorHandler = true
+                setImageUrl('')
             }
         }
     }
@@ -113,19 +137,39 @@ export default function App() {
                 const putBoxOnImage =  displayFaceBox(boxSizes)
             };
             if (session?.user && !errorHandler) {
-                const getRanking = await axiosAuth.post('/add-search-to-data', {
-                    id: session?.user.id,
-                    url: url
-                });
-                const totalSearches = getRanking.data.total_searches
-                await update({...session, 
-                    user: {
-                        ...session?.user,
-                        total_searches: totalSearches
+                try {
+                    const getRanking = await axiosAuth.patch('/add-search-to-data', {
+                        id: session?.user.id,
+                        url: url
+                    });
+                    const totalSearches = getRanking.data.total_searches
+                    // TODO: Check how to update without reloading 
+                    await update({...session, 
+                        user: {
+                            ...session?.user,
+                            total_searches: totalSearches
+                        }
+                    });
+                } catch (error) {
+                    if (error instanceof AxiosError) {
+                        if (error.response?.data.msg === 'Token has expired') {
+                        toast({
+                            variant: "destructive",
+                            title: 'Unable to update your search count!',
+                            description: "Your session has expired, please login again.",
+                            action: <ToastAction 
+                            onClick={() => signOut({
+                                            redirect:true,
+                                            callbackUrl: '/login'
+                                        })} 
+                            altText="Login"> Login </ToastAction>,
+                            })
+                        } else {
+                            console.log(error)
+                        }
                     }
-                });
-            }
-            
+                }
+            }   
         } catch {
             console.log(`Couldn't proccess url image, please check if the url is correct and try again.`)
         }
