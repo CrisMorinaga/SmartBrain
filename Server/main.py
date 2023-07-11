@@ -18,6 +18,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 import json
 from datetime import datetime, timedelta, timezone
+import array
+import base64
+
 
 # Load variables from .env file
 load_dotenv()
@@ -46,7 +49,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(250), nullable=False, unique=True)
     email = db.Column(db.String(250), nullable=False, unique=True)
     password_hash = db.Column(db.String(250), nullable=False)
-    profile_img = db.Column(db.String(250), nullable=True)
+    profile_img = db.Column(db.LargeBinary, nullable=True)
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
     searches = relationship("NumberOfSearches", back_populates="user")
@@ -145,7 +148,7 @@ def handle_login():
                     "email": user.email,
                     "access_token": access_token,
                     "total_searches": 0,
-                    "profile_picture": user.profile_img
+                    "profile_picture": True if user.profile_img is not None else False
                 }
                 return response
             else:
@@ -156,9 +159,11 @@ def handle_login():
                     "email": user.email,
                     "access_token": access_token,
                     "total_searches": NumberOfSearches.query.filter_by(user_id=user.id).count(),
-                    "profile_picture": user.profile_img
+                    "profile_picture": True if user.profile_img is not None else False
                 }
                 return response
+        else:
+            return {"msg": "Incorrect username or password"}, 401
 
 
 @app.route("/logout", methods=['POST'])
@@ -191,7 +196,6 @@ def handle_ranking():
 @app.route('/profile', methods=['POST'])
 @jwt_required()
 def profile():
-    # TODO: Finish profile
     user_id = request.json.get('id')
     searches = NumberOfSearches.query.filter_by(user_id=user_id).all()
     search_list = [search.search_url for search in searches]
@@ -200,6 +204,81 @@ def profile():
         "urls": search_list,
     }
     return response_body
+
+
+@app.route('/get-image', methods=['POST'])
+@jwt_required()
+def get_image():
+    user_id = request.json.get('id')
+
+    user = User.query.filter_by(id=user_id).first()
+    if user:
+        bytes_data_img = user.profile_img
+        uint_array = array.array('B')
+        uint_array.frombytes(bytes_data_img)
+        base64_data = base64.b64encode(uint_array).decode('utf-8')
+
+        response_body = {
+            'image': base64_data
+        }
+
+        return response_body
+
+
+@app.route('/update-profile', methods=['PATCH'])
+@jwt_required()
+def update_profile():
+    user_id = request.json.get('id')
+    new_img = request.json.get('image')
+    new_username = request.json.get('username').lower()
+
+    uint_array = None
+
+    if new_img is not None and not isinstance(new_img, bool):
+        uint_array = array.array('B', new_img)
+
+    user = User.query.filter_by(id=user_id).first()
+    if user:
+        user.profile_img = uint_array if (new_img is not None and not isinstance(new_img, bool)) else user.profile_img \
+            if isinstance(new_img, bool) else None
+        user.username = new_username if new_username != '' else user.username
+
+        db.session.commit()
+
+        return {'message': 'Updated successfully'}, 200
+    else:
+        return {'message': 'User not found'}, 404\
+
+
+
+@app.route('/update-account', methods=['PATCH'])
+@jwt_required()
+def update_account():
+    first_name = request.json.get('firstName')
+    last_name = request.json.get('lastName')
+
+    user_id = request.json.get('id')
+    new_name = (last_name + ' ' + first_name).lower()
+    new_email = request.json.get('email')
+    new_password = request.json.get('password')
+
+    hashed_password = (
+        generate_password_hash(new_password, method='pbkdf2:sha256', salt_length=8) if new_password != '' else ''
+    )
+
+    user = User.query.filter_by(id=user_id).first()
+    if user:
+        if check_password_hash(pwhash=user.password_hash, password=new_password):
+            return {"message": "Password must not be the same as your previous one."}, 409
+
+        user.name = new_name if new_name.replace(' ', '') != '' else user.name
+        user.email = new_email if new_email != '' else user.email
+        user.password_hash = hashed_password if hashed_password != '' else user.password_hash
+        db.session.commit()
+
+        return {'message': 'Updated successfully'}, 200
+    else:
+        return {'message': 'User not found'}, 404
 
 
 @app.route("/api", methods=['GET'])

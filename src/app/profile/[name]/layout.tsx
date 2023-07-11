@@ -31,7 +31,7 @@ export default function Layout({ children }: SettingsLayoutProps) {
                         <div className="space-y-0.5">
                             <h2 className="text-2xl font-bold tracking-tight text-white">Settings</h2>
                             <p className="text-slate-300">
-                                Manage your account settings and set e-mail preferences.
+                                Manage your account settings.
                             </p>
                         </div>
                         <Separator className="my-6" />

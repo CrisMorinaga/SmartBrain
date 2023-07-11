@@ -2,7 +2,6 @@
 import image from './noImage.png'
 import errorImage from './error.png'
 import Image from 'next/image'
-import { useEffect } from 'react'
 
 interface Data {
     topRow: number,

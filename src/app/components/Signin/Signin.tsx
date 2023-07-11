@@ -29,7 +29,7 @@ const formSchema = z.object({
 })
 
 type Props = {
-    catchError: () => void
+    catchError: (userDoesntExist: boolean) => void
 }
 
 export function Signin({catchError}: Props) {
@@ -51,8 +51,12 @@ export function Signin({catchError}: Props) {
             redirect:false,
         });
         if (result?.error?.includes('404')) {
-            catchError()
-        } 
+            catchError(true)
+        } else if (result?.error?.includes('401')) {
+            catchError(false)
+            console.log(result.error)
+            console.log('new error')
+        }
     }
 
     return (

@@ -9,7 +9,8 @@ declare module "next-auth"{
             email: string,
             access_token: string,
             total_searches: number,
-            profile_picture: string
+            profile_picture: any,
+            profile_picture_url: string,
         }
     }
 }

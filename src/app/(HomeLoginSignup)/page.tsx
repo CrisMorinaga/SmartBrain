@@ -179,7 +179,7 @@ export default function App() {
     return ( 
         <>
             <div className="App">
-                {status === 'loading'
+                {status === 'loading' 
 
                 ? <></>
 

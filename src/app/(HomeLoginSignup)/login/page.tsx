@@ -1,16 +1,17 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import { Signin } from "@/app/components/Signin/Signin";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/app/components/shadcn-ui/use-toast"
+import { ToastAction } from "@/app/components/shadcn-ui/toast";
+import { Signin } from "@/app/components/Signin/Signin";
 
 export default function logIn() {
 
     const { data: session, status } = useSession();
     const router = useRouter();
     const { toast } = useToast()
-    const [ error, setError] = useState(false)
+    const [ error, setError] = useState(200)
     
     useEffect(() => {
         if (session) {
@@ -18,17 +19,29 @@ export default function logIn() {
         }
     }, [session, router])
 
-    const catchError = () => {
-        setError(true)
+    const catchError = (userDoesntExist: boolean) => {
+        if (userDoesntExist) {
+            setError(404)
+        } else {
+            setError(401)
+        }
     }
 
     useEffect(() => {
-        if (error) {
+        if (error === 404) {
+            toast({
+                variant: "destructive",
+                description: "That username / email doesn't exist, maybe you meant register?",
+                action: <ToastAction 
+                    onClick={() => router.push('/signup')} 
+                    altText="Login"> Register </ToastAction>,
+            })
+        } else if (error === 401) {
             toast({
                 variant: "destructive",
                 description: "Incorrect username or password.",
                 })
-        } setError(false);
+        } setError(200);
     }, [error])
 
     return (  

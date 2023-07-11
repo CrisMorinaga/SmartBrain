@@ -21,9 +21,9 @@ export default function RootLayout({ children }:  { children: React.ReactNode}) 
         <html lang="en">
            <body suppressHydrationWarning={true} className={`${inter.className} bg-gradient-to-l from-project-boxes-border to-project-lighter-magenta`}>
                 <Provider>
+                    <Particle />
                     <Navigation/>
                     {children}
-                    <Particle />
                     <Toaster />
                 </Provider>
             </body>
