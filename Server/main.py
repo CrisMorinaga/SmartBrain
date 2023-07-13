@@ -7,7 +7,7 @@ from flask import Flask, jsonify, request
 
 from sqlalchemy import or_
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import relationship, InstanceState
+from sqlalchemy.orm import relationship
 
 from flask_cors import CORS, cross_origin
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
@@ -67,11 +67,6 @@ class NumberOfSearches(db.Model):
 # Configure login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-# TODO: Remember to erase this code for deployment
-# Create tables on db
-# with app.app_context():
-#     db.create_all()
 
 
 @login_manager.user_loader

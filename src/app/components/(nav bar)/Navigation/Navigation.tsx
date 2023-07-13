@@ -14,7 +14,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@/app/components/shadcn-ui/dropdown-menu"
-  import { LogOut, User, BrainCog, Brain } from "lucide-react"
+  import { LogOut, User, BrainCog } from "lucide-react"
 import { NavSkeleton } from '../NavigationSkeleton/NavigationSkeleton';
 import { useEffect } from 'react';
 import { AxiosError } from 'axios';
@@ -90,7 +90,6 @@ export default function Navigation() {
                 }
             }
         }
-        
     }
 
     const handleImageError = async () => {

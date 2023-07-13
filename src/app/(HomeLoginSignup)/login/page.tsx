@@ -6,18 +6,20 @@ import { useToast } from "@/app/components/shadcn-ui/use-toast"
 import { ToastAction } from "@/app/components/shadcn-ui/toast";
 import { Signin } from "@/app/components/Signin/Signin";
 
+
 export default function logIn() {
 
-    const { data: session, status } = useSession();
+    const { data: session, status } = useSession()
+        
     const router = useRouter();
     const { toast } = useToast()
     const [ error, setError] = useState(200)
-    
+
     useEffect(() => {
         if (session) {
             router.push(`/profile/${session.user.username}`)
         }
-    }, [session, router])
+    }, [session])
 
     const catchError = (userDoesntExist: boolean) => {
         if (userDoesntExist) {
@@ -44,8 +46,10 @@ export default function logIn() {
         } setError(200);
     }, [error])
 
+    console.log('normal session: ', session?.user)
+
     return (  
-        <>{status === 'loading'
+        <>{session?.user
         ? <></>
         :<div className="Signin">
             <Signin catchError={catchError}/>
