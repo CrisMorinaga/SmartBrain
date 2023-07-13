@@ -21,11 +21,11 @@ export function SidebarNav() {
     const sidebarNavItems: SidebarNavProps['items'] = [
         {
           title: "Profile",
-          href: `/profile/${session?.user.username}`,
+          href: `/profile/${session?.user.username}/settings/profile`,
         },
         {
           title: "Account",
-          href: `/profile/${session?.user.username}/account`,
+          href: `/profile/${session?.user.username}/settings/account`,
         },
       ]
 

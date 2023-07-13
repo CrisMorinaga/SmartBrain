@@ -7,7 +7,7 @@ from flask import Flask, jsonify, request
 
 from sqlalchemy import or_
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, InstanceState
 
 from flask_cors import CORS, cross_origin
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user
@@ -29,7 +29,6 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-# TODO: Check token refresh
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 CORS(app)
 jwt = JWTManager(app)
@@ -196,14 +195,20 @@ def handle_ranking():
 @app.route('/profile', methods=['POST'])
 @jwt_required()
 def profile():
+
     user_id = request.json.get('id')
+
     searches = NumberOfSearches.query.filter_by(user_id=user_id).all()
     search_list = [search.search_url for search in searches]
+    date = [search.date_added for search in searches]
 
-    response_body = {
-        "urls": search_list,
-    }
-    return response_body
+    response_dict = {}
+
+    for url, date in zip(search_list, date):
+        if url not in response_dict:
+            response_dict[url] = date
+
+    return response_dict
 
 
 @app.route('/get-image', methods=['POST'])

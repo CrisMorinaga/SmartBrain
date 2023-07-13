@@ -14,9 +14,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@/app/components/shadcn-ui/dropdown-menu"
-  import { LogOut, User } from "lucide-react"
+  import { LogOut, User, BrainCog, Brain } from "lucide-react"
 import { NavSkeleton } from '../NavigationSkeleton/NavigationSkeleton';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { AxiosError } from 'axios';
 import { toast } from '../../shadcn-ui/use-toast';
 import { ToastAction } from '../../shadcn-ui/toast';
@@ -122,7 +122,7 @@ export default function Navigation() {
 
                     <div className="">
                         <p className=" text-project-blue text-2xl
-                        m-2 p-1 mr-2">
+                        m-2 p-1 mr-2 cursor-default">
                             SmartBrain
                         </p>
                     </div>
@@ -155,6 +155,11 @@ export default function Navigation() {
                                                         className="cursor-pointer">
                                             <User className="mr-2 h-4 w-4 cursor-pointer" />
                                             <span>Profile</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => router.push(`/profile/${session.user.username}/settings/profile`)} 
+                                                        className="cursor-pointer">
+                                            <BrainCog className="mr-2 h-4 w-4 cursor-pointer"/>
+                                            <span>Settings</span>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={handleLogOut} 
                                                         className="cursor-pointer">

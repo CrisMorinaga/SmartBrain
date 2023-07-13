@@ -52,8 +52,8 @@ export function ImageLinkForm ({onSubmit, setErrorBackToFalse, setErrorTrue, res
     return (
         <>
             <div>
-                <p className="text-lg text-project-light-blue text-center">
-                    {'This Magic Brain will detect faces in your pictures. Give it a try.'}
+                <p className="text-lg text-project-light-blue text-center cursor-default">
+                    This Magic Brain will detect faces in your pictures. Give it a try.
                 </p>
                 <div className="container center">
                     <div className="border border-project-text-color mt-3 rounded shadow-lg">

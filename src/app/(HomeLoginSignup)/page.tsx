@@ -1,8 +1,8 @@
 'use client'
 
-import { ImageLinkForm } from "../components/ImageLinkForm/ImageLinkForm";
-import { Rank } from "../components/Rank/Rank";
-import { FaceRecognition } from "../components/FaceRecognition/FaceRecognition";
+import { ImageLinkForm } from "../components/(home page)/ImageLinkForm/ImageLinkForm";
+import { Rank } from "../components/(home page)/Rank/Rank";
+import { FaceRecognition } from "../components/(home page)/FaceRecognition/FaceRecognition";
 import React from "react";
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
@@ -12,7 +12,6 @@ import * as z from "zod"
 import { toast } from "../components/shadcn-ui/use-toast";
 import { AxiosError } from "axios";
 import { ToastAction } from "../components/shadcn-ui/toast";
-
 
 
 type Data = {
@@ -33,7 +32,7 @@ const mySchema = z.object({
 export default function App() {
 
     const axiosAuth = useAxiosAuth()
-    const { data: session, update, status } = useSession()
+    const { data: session, update } = useSession()
 
     const [imageUrl, setImageUrl] = useState('');
     const [box, setBox] = useState([]);
@@ -143,7 +142,6 @@ export default function App() {
                         url: url
                     });
                     const totalSearches = getRanking.data.total_searches
-                    // TODO: Check how to update without reloading 
                     await update({...session, 
                         user: {
                             ...session?.user,
@@ -173,17 +171,12 @@ export default function App() {
         } catch {
             console.log(`Couldn't proccess url image, please check if the url is correct and try again.`)
         }
-        
     }
 
     return ( 
         <>
             <div className="App">
-                {status === 'loading' 
-
-                ? <></>
-
-                :<div className="mt-5">
+                <div className="mt-5">
                     <Rank />
                     <ImageLinkForm 
                     resetUrl={resetUrl}
@@ -194,7 +187,6 @@ export default function App() {
                     />
                     <FaceRecognition error={error} box={box} imgUrl={imageUrl}/>
                 </div>
-                }
             </div>  
         </>
     )

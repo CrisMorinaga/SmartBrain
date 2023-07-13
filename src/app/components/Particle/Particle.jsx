@@ -83,7 +83,6 @@ export default function Particle () {
             },
         },
         detectRetina: true,
-        zIndex: -1
     }
 
     return (
@@ -92,7 +91,6 @@ export default function Particle () {
             init={particlesInit}
             loaded={particlesLoaded}
             options={particlesOptions}
-            className="fixed"
         />
     )
 }

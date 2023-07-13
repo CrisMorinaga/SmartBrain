@@ -15,6 +15,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
     title: "SmartBrain",
     description: "User settings configuration.",
+     icons: {
+        icon: '/icon.png',
+    },
 }
 
 interface SettingsLayoutProps {

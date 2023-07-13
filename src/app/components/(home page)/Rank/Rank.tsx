@@ -11,7 +11,7 @@ export function Rank () {
         <>
             {session? (
             <div className="flex flex-col items-center mb-3">
-                <div className="text-project-text-color mt-1 p-1 border border-dashed rounded"
+                <div className="text-project-text-color mt-1 p-1 border border-dashed rounded cursor-default"
                 >
                     {`You have made ${search} ${(search === 1)? 'search': 'searches'}`}.
                 </div>
