@@ -28,9 +28,10 @@ export default function Searches() {
             const getUrlSearches = await axiosAuth.post('/profile', {
                 id: session?.user.id
             }) 
+
             const responseData = getUrlSearches.data;
             const array: [string, string][] = Object.entries(responseData);
-            const sortedArray = array.sort((a, b) => a[1].localeCompare(b[1]));
+            const sortedArray = array.sort((a, b) => new Date(a[1]).getTime() - new Date(b[1]).getTime());
 
             setData(sortedArray)
 

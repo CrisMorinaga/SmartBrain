@@ -1,4 +1,4 @@
-clarifai_grpc==9.5.0
+clarifai_grpc==9.6.0
 Flask==2.3.2
 Flask_Cors==4.0.0
 Flask_JWT_Extended==4.5.2

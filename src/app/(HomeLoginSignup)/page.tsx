@@ -83,7 +83,10 @@ export default function App() {
             const clarifaiFace = data.map((jsonString: any) => JSON.parse(jsonString));
             
             const positionArray = clarifaiFace.map((obj: Data) => {
-                const width = image.width;
+
+                const validationResult = mySchema.safeParse(obj);
+                if (validationResult.success) {
+                    const width = image.width;
                 const height = image.height;
 
                 return {
@@ -91,6 +94,15 @@ export default function App() {
                     topRow: obj.topRow * height,
                     rightCol: width - (obj.rightCol * width),
                     bottomRow: height - (obj.bottomRow * height)
+                }
+                } else {
+                    toast({
+                        variant: "destructive",
+                        description: "Uh oh! There seems to be a problem with that image. Try with a new one.",
+                        })
+                    setError(true)
+                    errorHandler = true
+                    setImageUrl('')
                 }
             });
 
