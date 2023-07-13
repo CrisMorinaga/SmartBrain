@@ -21,7 +21,7 @@ export function FaceRecognition({imgUrl, box, error}: Props) {
     return (
         <div className="center m-4">
             <div className="shadow-lg absolute">
-                <div className='container flex flex-col'>
+                <div className='flex flex-col'>
                     { imgUrl !== ""?
                         <>
                         <img 
