@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import useAxiosAuth from "@/library/hooks/useAxiosAuth"
 import { signOut, useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
@@ -59,9 +60,9 @@ export default function Searches() {
 
     useEffect(() => {
         if (session?.user.access_token !== undefined) {
-            console.log('ran')
             urlsFetching()
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session?.user.access_token])
 
     return (

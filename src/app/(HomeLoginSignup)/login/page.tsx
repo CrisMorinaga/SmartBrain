@@ -7,7 +7,7 @@ import { ToastAction } from "@/app/components/shadcn-ui/toast";
 import { Signin } from "@/app/components/Signin/Signin";
 
 
-export default function logIn() {
+export default function LogIn() {
 
     const { data: session, status } = useSession()
         
@@ -19,6 +19,7 @@ export default function logIn() {
         if (session) {
             router.push(`/profile/${session.user.username}`)
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session])
 
     const catchError = (userDoesntExist: boolean) => {
@@ -44,6 +45,7 @@ export default function logIn() {
                 description: "Incorrect username or password.",
                 })
         } setError(200);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [error])
 
     return (  

@@ -24,12 +24,14 @@ export function ImageLinkForm ({onSubmit, setErrorBackToFalse, setErrorTrue, res
             prevNameRef.current = name;
             resetUrl()
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [error])
 
     useEffect(() => {
         if (prevNameRef.current !== name && error) {
             setErrorBackToFalse();
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [name, error])
 
     const handleNameChange = (name: string) => {

@@ -32,6 +32,7 @@ const useAxiosAuth = () => {
             axiosAuth.interceptors.request.eject(requestIntercept);
             axiosAuth.interceptors.response.eject(responseIntercept)
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session])
 
     return axiosAuth;

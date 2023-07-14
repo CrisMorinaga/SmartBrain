@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "../../components/shadcn-ui/use-toast";
 
-export default function logIn() {
+export default function LogIn() {
 
     const { data: session, status } = useSession();
     const router = useRouter();

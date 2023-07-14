@@ -97,10 +97,11 @@ export default function Navigation() {
     }
 
     useEffect(() => {
-        if (session?.user.profile_picture === true && session.user.profile_picture_url === undefined) {
+        if (session?.user.profile_picture === true && session?.user.profile_picture_url === undefined) {
             getProfilePict()
         }
-    }, [session?.user.profile_picture])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session?.user.profile_picture, session?.user.profile_picture_url])
 
     return (
         <div>
