@@ -76,7 +76,7 @@ export default function Searches() {
                         <div className="pics" key={index}>
                             <Dialog>
                             <DialogTrigger>
-                                <img src={url} alt="" className="w-[100%] rounded border"/>
+                                <img src={url} alt="" className="rounded border"/>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
                                 <DialogHeader>
