@@ -46,8 +46,6 @@ export default function logIn() {
         } setError(200);
     }, [error])
 
-    console.log('normal session: ', session?.user)
-
     return (  
         <>{session?.user
         ? <></>

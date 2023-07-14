@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "SmartBrain",
     description: "User settings configuration.",
      icons: {
-        icon: '/icon.png',
+        icon: './icon.png',
     },
 }
 

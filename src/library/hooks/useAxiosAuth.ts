@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { useEffect } from "react";
-import axios, { axiosAuth } from "../axios";
+import { axiosAuth } from "../axios";
 
 
 const useAxiosAuth = () => {
