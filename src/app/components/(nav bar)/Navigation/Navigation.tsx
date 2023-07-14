@@ -14,9 +14,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@/app/components/shadcn-ui/dropdown-menu"
-import { LogOut, User, BrainCog } from "lucide-react"
+import { LogOut, User, BrainCog, Menu, LogIn, Album } from "lucide-react"
 import { NavSkeleton } from '../NavigationSkeleton/NavigationSkeleton';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
 import { toast } from '../../shadcn-ui/use-toast';
 import { ToastAction } from '../../shadcn-ui/toast';
@@ -24,8 +24,26 @@ import { ToastAction } from '../../shadcn-ui/toast';
 export default function Navigation() {
 
     const router = useRouter();
-    const { data: session, status, update } = useSession()
-    const axiosAuth = useAxiosAuth()
+    const { data: session, status, update } = useSession();
+    const axiosAuth = useAxiosAuth();
+
+    const [ smallScreen, setSmallScreen ] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setSmallScreen(window.innerWidth < 768);
+        };
+
+        // Initial check on component mount
+        handleResize();
+
+        window.addEventListener('resize', handleResize)
+
+        // Clean up
+        return () => {
+            window.removeEventListener('resize', handleResize)
+        }
+    }, []);
 
     async function handleLogOut() {
 
@@ -108,24 +126,86 @@ export default function Navigation() {
             {status === 'loading' ? (
                 <> <NavSkeleton /> </> 
             ) : (
-                <nav className="flex place-content-between items-center bg-white rounded">
-                    <div className="flex flex-row items-center">
-                    <Logo router={router}/>  
-                    <p 
-                    className=" text-project-blue text-lg
-                    m-2 p-1 cursor-pointer hover:text-project-light-blue"
-                    onClick={() => router.push('/')}
-                    >
-                    Home
-                    </p>
-                    </div>
+                smallScreen ? (
+                    <nav className="flex place-content-between items-center bg-white rounded">
+                        <Logo router={router}/>  
 
-                    <div className="">
                         <p className=" text-project-blue text-2xl
-                        m-2 p-1 mr-2 cursor-default">
-                            SmartBrain
+                            m-2 p-1 mr-2 cursor-default">
+                                SmartBrain
                         </p>
+                    {session?.user ? (
+                        <div className="m-4">
+                            <DropdownMenu>
+                            <DropdownMenuTrigger>
+                                <Avatar>
+                                    {session.user.profile_picture && session.user.profile_picture_url !== undefined && (
+                                        <Image onError={handleImageError} src={session.user.profile_picture_url} width={40} height={40}  alt=''></Image>
+                                    )}
+                                    {!session?.user.profile_picture && (
+                                        <AvatarFallback>{session?.user.username.charAt(0)}</AvatarFallback>
+                                    )}
+                                </Avatar>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuLabel className=" text-project-boxes-border cursor-default">{session.user.email}</DropdownMenuLabel>
+                                <DropdownMenuSeparator className=" bg-slate-600" />
+                                <DropdownMenuItem onClick={() => router.push(`/profile/${session.user.username}`)} 
+                                                className="cursor-pointer">
+                                    <User className="mr-2 h-4 w-4 cursor-pointer" />
+                                    <span>Profile</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push(`/profile/${session.user.username}/settings/profile`)} 
+                                                className="cursor-pointer">
+                                    <BrainCog className="mr-2 h-4 w-4 cursor-pointer"/>
+                                    <span>Settings</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleLogOut} 
+                                                className="cursor-pointer">
+                                    <LogOut className="mr-2 h-4 w-4 cursor-pointer" />
+                                    <span>Logout</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
+                    ) : (
+                        <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <Menu className='m-4'/>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => signIn()} className="cursor-pointer">   
+                                <LogIn className="mr-2 h-4 w-4 cursor-pointer"/>
+                                <p>Log in</p>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => router.push('/signup')} className="cursor-pointer">   
+                                <Album className="mr-2 h-4 w-4 cursor-pointer"/>
+                                <p> Register</p>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    )}
+                    </nav>
+                ) : (
+                    <nav className="flex place-content-between items-center bg-white rounded">
+                        <div className="flex flex-row items-center">
+                            <Logo router={router}/>  
+                            <p 
+                            className=" text-project-blue text-lg
+                            m-2 p-1 cursor-pointer hover:text-project-light-blue"
+                            onClick={() => router.push('/')}
+                            >
+                            Home
+                            </p>
+                        </div>
+
+                        <div className="">
+                            <p className=" text-project-blue text-2xl
+                            m-2 p-1 mr-2 cursor-default">
+                                SmartBrain
+                            </p>
+                        </div>
+
                     <div className="flex flex-row items-center">
                         {session?.user ? (
                             <>
@@ -189,6 +269,7 @@ export default function Navigation() {
                         )}
                     </div>
                 </nav>
+                )
             )}
         </div>
     )

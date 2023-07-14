@@ -57,7 +57,7 @@ export function ImageLinkForm ({onSubmit, setErrorBackToFalse, setErrorTrue, res
                 <p className="text-lg text-project-light-blue text-center cursor-default">
                     This Magic Brain will detect faces in your pictures. Give it a try.
                 </p>
-                <div className="container center">
+                <div className="container center sm:grid-cols-2">
                     <div className="border border-project-text-color mt-3 rounded shadow-lg">
                         <input 
                             value={name} 
@@ -65,7 +65,7 @@ export function ImageLinkForm ({onSubmit, setErrorBackToFalse, setErrorTrue, res
                             placeholder="Enter an image url"
                             onKeyDown={handleKeyPress}
                             style={{ paddingLeft: '0.75rem'}}
-                            className=" w-80 ml-3 rounded" 
+                            className="sm:w-80 w-44 ml-3 rounded" 
                             type="text" 
                         />
                         <button
