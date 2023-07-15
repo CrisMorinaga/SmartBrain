@@ -4,8 +4,6 @@ import { useSession } from "next-auth/react"
 import { useEffect } from "react";
 import { axiosAuth } from "../axios";
 
-const API_AUTH = process.env.NEXT_PUBLIC_API_AUTH
-
 const useAxiosAuth = () => {
     const { data: session, update } = useSession();
 

@@ -19,7 +19,7 @@ export default function LogIn() {
         if (error) {
             toast({
                 variant: "destructive",
-                description: "That username already exists in our database. Try with another one.",
+                description: "That username is already taken. Try with another one.",
                 })
         } setError(false);
     }, [error])

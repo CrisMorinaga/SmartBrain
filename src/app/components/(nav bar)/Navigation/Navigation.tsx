@@ -76,7 +76,7 @@ export default function Navigation() {
 
         try{
             const response = await axiosAuth.post('/get-image', {
-                id: session?.user.id
+                id: session?.user.id,
             })
             const base64Img = response.data.image
             const uint8Array = base64ToUint8Array(base64Img);
