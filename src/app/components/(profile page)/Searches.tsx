@@ -68,7 +68,7 @@ export default function Searches() {
     return (
         <>
             <Separator className="mb-4"/>
-            <div className="gallery">
+            <div className="gallery columns-3">
                 {data.map((urlData, index) => {
                     const url = urlData[0];
                     const date = urlData[1]

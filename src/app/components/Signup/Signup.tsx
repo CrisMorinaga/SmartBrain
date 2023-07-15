@@ -163,9 +163,9 @@ export function Signup({catchError}:Props) {
         }
 
     return (
-        <div className="container my-10">
-            <div className="center">
-                <div className="w-[400px] border rounded m-4 bg-project-boxes">
+        <div className="sm:container flex justify-center my-10">
+            <div className="sm:center w-[360px] ">
+                <div className="sm:w-[400px] border rounded-xl bg-project-boxes">
                     <Form {...form}>
                         <form 
                         method="POST" 
@@ -173,7 +173,7 @@ export function Signup({catchError}:Props) {
                         onSubmit={form.handleSubmit(onSubmit)} 
                         className="space-y-8 m-4">
 
-                            <div className="flex gap-3">
+                            <div className="sm:flex gap-3">
                                 <FormField
                                 control={form.control}
                                 name="firstName"
@@ -187,19 +187,20 @@ export function Signup({catchError}:Props) {
                                     </FormItem>
                                 )}
                                 />
-
-                                <FormField
-                                control={form.control}
-                                name="lastName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                    <FormLabel className=" text-white">Last name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Your last name" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                    </FormItem>
-                                )}/>
+                                <div className="sm:mt-0 mt-8">
+                                    <FormField
+                                    control={form.control}
+                                    name="lastName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                        <FormLabel className=" text-white">Last name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Your last name" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                        </FormItem>
+                                    )}/>
+                                </div>
                             </div>
                             
                             <FormField
@@ -209,7 +210,7 @@ export function Signup({catchError}:Props) {
                                 <FormItem>
                                 <FormLabel className=" text-white">Email</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="email@mail.com" {...field} />
+                                    <Input autoComplete="username" placeholder="email@mail.com" {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -222,7 +223,7 @@ export function Signup({catchError}:Props) {
                                 <FormItem>
                                 <FormLabel className=" text-white">Username</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Something cool" {...field} />
+                                    <Input autoComplete="username" placeholder="Something cool" {...field} />
                                 </FormControl>
                                 <FormDescription className=" text-project-text-color">
                                     Your username will be visible to all users.
@@ -240,6 +241,7 @@ export function Signup({catchError}:Props) {
                                     <FormLabel className=" text-white">Password</FormLabel>
                                     <FormControl>
                                         <Input 
+                                            autoComplete="new-password"
                                             type={showPassword ? 'text' : 'password'}  
                                             placeholder={showPassword ? '12345678' : '********'} {...field} />
                                     </FormControl>
@@ -255,6 +257,7 @@ export function Signup({catchError}:Props) {
                                     <FormLabel className=" text-white">Confirm your password</FormLabel>
                                     <FormControl>
                                         <Input 
+                                            autoComplete="new-password"
                                             type={showPassword ? 'text' : 'password'} 
                                             placeholder={showPassword ? '12345678' : '********'} {...field} />
                                     </FormControl>

@@ -14,7 +14,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@/app/components/shadcn-ui/dropdown-menu"
-import { LogOut, User, BrainCog, Menu, LogIn, Album } from "lucide-react"
+import { LogOut, User, BrainCog, Menu, LogIn, ImageIcon } from "lucide-react"
 import { NavSkeleton } from '../NavigationSkeleton/NavigationSkeleton';
 import { useEffect, useState } from 'react';
 import { AxiosError } from 'axios';
@@ -152,8 +152,8 @@ export default function Navigation() {
                                 <DropdownMenuSeparator className=" bg-slate-600" />
                                 <DropdownMenuItem onClick={() => router.push(`/profile/${session.user.username}`)} 
                                                 className="cursor-pointer">
-                                    <User className="mr-2 h-4 w-4 cursor-pointer" />
-                                    <span>Profile</span>
+                                    <ImageIcon className="mr-2 h-4 w-4 cursor-pointer" />
+                                    <span>Gallery</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => router.push(`/profile/${session.user.username}/settings/profile`)} 
                                                 className="cursor-pointer">
@@ -179,7 +179,7 @@ export default function Navigation() {
                                 <p>Log in</p>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => router.push('/signup')} className="cursor-pointer">   
-                                <Album className="mr-2 h-4 w-4 cursor-pointer"/>
+                                <User className="mr-2 h-4 w-4 cursor-pointer"/>
                                 <p> Register</p>
                             </DropdownMenuItem>
                         </DropdownMenuContent>

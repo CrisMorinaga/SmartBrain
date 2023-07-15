@@ -259,7 +259,7 @@ export function AccountForm() {
                     <FormItem>
                     <FormLabel className=" text-white">Email</FormLabel>
                     <FormControl>
-                        <Input placeholder={session?.user.email} {...field} />
+                        <Input autoComplete='username' placeholder={session?.user.email} {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -274,6 +274,7 @@ export function AccountForm() {
                         <FormLabel className=" text-white">New password</FormLabel>
                         <FormControl>
                             <Input 
+                                autoComplete='new-password'
                                 type={showPassword ? 'text' : 'password'}  
                                 placeholder={showPassword ? '12345678' : '********'} {...field} />
                         </FormControl>
@@ -288,6 +289,7 @@ export function AccountForm() {
                         <FormLabel className=" text-white">Confirm your new password</FormLabel>
                         <FormControl>
                             <Input 
+                                autoComplete='new-password'
                                 type={showPassword ? 'text' : 'password'} 
                                 placeholder={showPassword ? '12345678' : '********'} {...field} />
                         </FormControl>
