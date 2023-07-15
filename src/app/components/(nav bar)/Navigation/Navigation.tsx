@@ -145,7 +145,7 @@ export default function Navigation() {
                                     {!session?.user.profile_picture && (
                                         <AvatarFallback>{session?.user.username.charAt(0)}</AvatarFallback>
                                     )}
-                                </Avatar>
+                                </Avatar> 
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 <DropdownMenuLabel className=" text-project-boxes-border cursor-default">{session.user.email}</DropdownMenuLabel>
@@ -233,8 +233,8 @@ export default function Navigation() {
                                         <DropdownMenuSeparator className=" bg-slate-600" />
                                         <DropdownMenuItem onClick={() => router.push(`/profile/${session.user.username}`)} 
                                                         className="cursor-pointer">
-                                            <User className="mr-2 h-4 w-4 cursor-pointer" />
-                                            <span>Profile</span>
+                                            <ImageIcon className="mr-2 h-4 w-4 cursor-pointer" />
+                                            <span>Gallery</span>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => router.push(`/profile/${session.user.username}/settings/profile`)} 
                                                         className="cursor-pointer">
@@ -257,7 +257,7 @@ export default function Navigation() {
                                 className=" text-project-blue text-lg
                                 m-2 p-1 mr-2 cursor-pointer hover:text-project-light-blue"
                                 >
-                                Sign in
+                                Log in
                                 </p>
                                 <p
                                 onClick={() => router.push('/signup')}

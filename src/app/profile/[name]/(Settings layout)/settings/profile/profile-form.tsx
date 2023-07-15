@@ -278,7 +278,7 @@ export function ProfileForm() {
                             <FormItem>
                                 <FormLabel className="text-white">Username</FormLabel>
                                 <FormControl>
-                                    <Input placeholder={session?.user.username} {...field} />
+                                    <Input autoComplete="username" placeholder={session?.user.username} {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 <FormDescription className=" text-project-text-color">
