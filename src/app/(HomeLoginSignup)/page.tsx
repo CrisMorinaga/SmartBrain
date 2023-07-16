@@ -28,6 +28,7 @@ const mySchema = z.object({
     rightCol: z.number()
 })
 
+const IMAGE_API_URL = process.env.NEXT_PUBLIC_IMAGE_API_URL
 
 export default function App() {
 
@@ -44,7 +45,7 @@ export default function App() {
         try{
             const response = await axios({
                 method: "GET",
-                url: '/api',
+                url: IMAGE_API_URL,
                 params: {
                     url: url
                 }

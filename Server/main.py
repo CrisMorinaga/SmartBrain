@@ -30,7 +30,13 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-CORS(app)
+CORS(
+    app,
+    methods=['POST', 'GET', 'PATCH'],
+    origins=['https://smartbrai.netlify.app', 'http://localhost:3000'],
+    supports_credentials=True,
+    allow_headers=['Content-Type', 'Authorization']
+)
 
 jwt = JWTManager(app)
 
@@ -210,6 +216,13 @@ def profile():
 @app.route('/get-image', methods=['POST'])
 @jwt_required()
 def get_image():
+    # if request.method == 'OPTIONS':
+    #     response = jsonify({'message': 'Preflight request handled'})
+    #     response.headers.add('Access-Control-Allow-Origin', '*')
+    #     response.headers.add('Access-Control-Allow-Methods', 'POST')
+    #     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-space-app-key')
+    #     return response
+    # else:
     user_id = request.json.get('id')
 
     user = User.query.filter_by(id=user_id).first()
