@@ -33,7 +33,7 @@ Simply follow this <a href="https://smartbrai.netlify.app/" target="_blank">Link
 ![How to use](https://github.com/CrisMorinaga/SmartBrain/assets/128830239/ff55b309-9911-4c10-ab12-454ad43c6cb4)
 
 > **Note**
-> When registering or loging-in there might be a tiny delay, this is because the server is running on a free plan and it turns down after some minutes of inactivity. It will be fixed once the server runs on a pay plan.
+> When registering or logging in there might be a tiny delay, this is because the server is running on a free plan and it turns down after some minutes of inactivity. It will be fixed once the server runs on a pay plan.
 
 ## Image Gallery
 
@@ -45,8 +45,8 @@ Simply follow this <a href="https://smartbrai.netlify.app/" target="_blank">Link
   - Clarifai (For the face recognition API)
   - Flask (For the backend API)
   - SQLAlchemy (ORM for Flask and PostgreSQL)
-  - Flask-login (To manage user login tokens between fronted and backend)
-  - Flask jwt extended (To manage user jwt tokens between frontend and backend)
+  - Flask-login (To manage user login tokens between frontend and backend)
+  - Flask JWT extended (To manage user JWT tokens between frontend and backend)
   - Werkzeug Security (To manage password hashing)
 * Frontend:
   - Next.js 13 (For designing the website)
@@ -58,7 +58,7 @@ Simply follow this <a href="https://smartbrai.netlify.app/" target="_blank">Link
 * Database:
   - PostgreSQL
 
-## Credits
+## About
 
 Made as the final project for the course on Web Development from Zero to Mastery:
 
@@ -68,7 +68,7 @@ Made as the final project for the course on Web Development from Zero to Mastery
 
 ## You may also like...
 
-- [AI Tic-Tac-Toe](https://github.com/amitmerchant1990/pomolectron) - A Tic-Tac-Toe app that uses an AI with 3 levels of difficulty
+- [AI Tic-Tac-Toe](https://github.com/CrisMorinaga/Tic-Tac-Toe) - A Tic-Tac-Toe app that uses an AI with 3 levels of difficulty
 
 ---
 
