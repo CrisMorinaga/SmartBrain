@@ -190,26 +190,26 @@ export function ProfileForm() {
                         const avatarUrl = await getDownloadURL(imageRef)
                         firebaseImgUrl = avatarUrl
                     } catch (error){
-                        console.log(error)
                         return
                     }
-
-                    const updatedImage = imageToUpload !== null ? firebaseImgUrl : session?.user.profile_picture_url || false;
-                    
-                    const updateProfile = await axiosAuth.patch('/update-profile', {
-                        id: session?.user.id,
-                        image: updatedImage,
-                        username: data.username
-                    })
-
-                    const updateSession = await update(
-                        {...session, 
-                        user: {
-                            ...updatedUser,
-                            profile_picture_url: updatedImage !== false ? updatedImage : undefined 
-                        }
-                    });
                 }
+
+                const updatedImage = imageToUpload !== null ? firebaseImgUrl : session?.user.profile_picture_url || false;
+                    
+                const updateProfile = await axiosAuth.patch('/update-profile', {
+                    id: session?.user.id,
+                    image: updatedImage,
+                    username: data.username
+                })
+
+                const updateSession = await update(
+                    {...session, 
+                    user: {
+                        ...updatedUser,
+                        profile_picture_url: updatedImage !== false ? updatedImage : undefined 
+                    }
+                });
+
                 const loadingFinishes = await handleLoading()
 
                 toast({
@@ -265,7 +265,7 @@ export function ProfileForm() {
                             )}
 
                             {!session?.user.profile_picture_url && imgUrl === '' && (
-                                <AvatarFallback>{session?.user.username.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{session?.user.username.charAt(0).toUpperCase()}</AvatarFallback>
                             )}
 
                         </Avatar>
@@ -289,7 +289,8 @@ export function ProfileForm() {
                             <FormItem>
                                 <FormLabel className="text-white">Username</FormLabel>
                                 <FormControl>
-                                    <Input placeholder={session?.user.username} {...field} />
+                                    <Input 
+                                    placeholder={session ? (session?.user.username.charAt(0).toUpperCase() + session?.user.username.slice(1)) : ''} {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 <FormDescription className=" text-project-text-color">

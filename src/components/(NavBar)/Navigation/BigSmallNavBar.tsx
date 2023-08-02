@@ -69,7 +69,7 @@ export function BigNavBar({handleImageError, handleLogOut, serverSession}: Props
                             {session?.user.profile_picture_url ? (
                                 <Image unoptimized={true} onError={handleImageError} src={session.user.profile_picture_url} width={40} height={40}  alt='avatar Image'></Image>
                             ) : (
-                                <AvatarFallback>{session?.user.username.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{session?.user.username.charAt(0).toUpperCase()}</AvatarFallback>
                             )}
                             </Avatar>
                         </DropdownMenuTrigger>
@@ -138,7 +138,7 @@ export function SmallScreenNavBar({handleImageError, handleLogOut, serverSession
                             {session?.user.profile_picture_url ? (
                                 <Image unoptimized={true} onError={handleImageError} src={session?.user.profile_picture_url} width={40} height={40}  alt='avatar Image'></Image>
                             ) : (
-                                <AvatarFallback>{session?.user.username.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{session?.user.username.charAt(0).toUpperCase()}</AvatarFallback>
                             )}
                         </Avatar> 
                     </DropdownMenuTrigger>
