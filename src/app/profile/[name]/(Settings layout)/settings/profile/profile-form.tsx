@@ -106,7 +106,7 @@ export function ProfileForm() {
             const user_id = session?.user.id
 
             const imageRef = ref(storage, `${IMAGE_LINK}${user_id}`)
-            const deleteFirebaseImg = deleteObject(imageRef)
+            const deleteFirebaseImg = await deleteObject(imageRef)
 
             const updateSession = await update(
                 {...session, 
@@ -121,10 +121,13 @@ export function ProfileForm() {
                 image: false,
                 username: session?.user.username
             })
-            setImgUrl('')
-            toast({
-                description: 'Your profile has been updated',
-            });
+            if (updateProfile) {
+                setImgUrl('')
+                toast({
+                    description: 'Your profile has been updated',
+                });
+            }
+            
         } catch (error) {
             if (error instanceof AxiosError) {
                 if (error.response?.data.msg === 'Token has expired') {
@@ -271,7 +274,7 @@ export function ProfileForm() {
                             <FormItem>
                                 <FormLabel className="text-white">Username</FormLabel>
                                 <FormControl>
-                                    <Input autoComplete="username" placeholder={session?.user.username} {...field} />
+                                    <Input placeholder={session?.user.username} {...field} />
                                 </FormControl>
                                 <FormMessage />
                                 <FormDescription className=" text-project-text-color">
