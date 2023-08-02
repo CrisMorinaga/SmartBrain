@@ -24,7 +24,6 @@
   - Instantly save your images after every search into your gallery to check them whenever you want.
 * Save your search history 
   - Save your search history information (like URL, date of search, and ranking of the image) into your account for future reference.
-* Dark/Light mode (to implement)
 
 ## How To Use
 
