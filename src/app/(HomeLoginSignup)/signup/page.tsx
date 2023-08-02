@@ -1,14 +1,17 @@
 'use client'
-import React, { useEffect, useState } from "react";
-import { Signup } from "../../components/Signup/Signup";
+
+import { toast } from "@/components/shadcn-ui/use-toast";
+import ProgressBar from "@/components/ProgressBar";
+import { Signup } from "@/components/Signup/Signup";
+
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { toast } from "../../components/shadcn-ui/use-toast";
+import React, { useEffect, useState } from "react";
+
+
 
 export default function LogIn() {
 
     const { data: session, status } = useSession();
-    const router = useRouter();
     const [error, setError] = useState(false)
 
     const catchError = () => {
@@ -24,15 +27,9 @@ export default function LogIn() {
         } setError(false);
     }, [error])
 
-    useEffect(() => {
-        if (session) {
-            router.push(`/profile/${session.user.username}`)
-        }
-    }, [session, router])
-
     return (  
-        <>{status === 'loading'
-        ?<></>
+        <>{session?.user 
+        ?<ProgressBar />
         :<div className="Signin">
             <Signup catchError={catchError}/>
         </div>  

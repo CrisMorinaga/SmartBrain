@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
-import { Button } from "@/app/components/shadcn-ui/button"
+import { Button } from "@/components/shadcn-ui/button"
 import {
     Form,
     FormControl,
@@ -13,19 +13,21 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/app/components/shadcn-ui/form"
-  
-import { Input } from "@/app/components/shadcn-ui/input"
-import { toast } from "@/app/components/shadcn-ui/use-toast"
-import { Avatar, AvatarFallback } from "@/app/components/shadcn-ui/avatar"
-import Image from "next/image"
+} from "@/components/shadcn-ui/form"
+import { Input } from "@/components/shadcn-ui/input"
+import { toast } from "@/components/shadcn-ui/use-toast"
+import { Avatar, AvatarFallback } from "@/components/shadcn-ui/avatar"
+import { ToastAction } from "@/components/shadcn-ui/toast"
+import FileUploader from "@/components/(ProfilePage)/FileUploader"
 
+import Image from "next/image"
 import { signOut, useSession } from "next-auth/react"
 import useAxiosAuth from "@/library/hooks/useAxiosAuth"
 import { AxiosError } from "axios"
-import { ToastAction } from "@/app/components/shadcn-ui/toast"
 import { useState } from "react"
-import FileUploader from "@/app/components/(profile page)/FileUploader"
+
+import { storage } from "@/firebase/clientApp"
+import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage"
 
 const maxFileSize = 1000000;
 
@@ -46,14 +48,14 @@ type ProfileFormValues = z.infer<typeof FormSchema>
 export function ProfileForm() {
         
     const { data: session, update } = useSession({required:true})
+    let firebaseImgUrl = ''
     const [ imgUrl, setImgUrl ] = useState('');
-    const [ bytea, setBytea ] = useState<any>(undefined);
+    const [ imageToUpload, setImageToUpload ] = useState<any>(null);
     const [ show, setShow ] = useState(false);
 
     const axiosAuth = useAxiosAuth();
 
     const form = useForm<ProfileFormValues>({
-        
         resolver: zodResolver(FormSchema),
         mode:'onChange',
         defaultValues: {
@@ -61,34 +63,6 @@ export function ProfileForm() {
             image: ''
         }
     })
-
-    const convertImageToByteArray = async (imageFile: File) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-        
-            reader.onload = (event) => {
-              if (event.target && event.target.result) {
-                let arrayBuffer = event.target.result;
-                if (typeof arrayBuffer === 'string') {
-                    arrayBuffer = Uint8Array.from(atob(arrayBuffer),
-                    (c) => c.charCodeAt(0)
-                    ).buffer;
-                }
-                const uintArray = new Uint8Array(arrayBuffer);
-                const byteArray = Array.from(uintArray);
-                resolve(byteArray);
-              } else {
-                reject(new Error('Failed to read image file'));
-              }
-            };
-        
-            reader.onerror = (event) => {
-              reject(new Error('Error reading image file'));
-            };
-        
-            reader.readAsArrayBuffer(imageFile);
-          });
-    }
     
     async function handleFileInputChange(e: any) {
         try {
@@ -106,13 +80,11 @@ export function ProfileForm() {
                 }
             })
 
-            const check = imageSquema.parse(image)
+            const checkImageSize = imageSquema.parse(image)
+            setImageToUpload(image)
 
-            const imageURL = URL.createObjectURL(image);
-            setImgUrl(imageURL);
-
-            const byteArray = await convertImageToByteArray(image) as Uint8Array;
-            setBytea(byteArray);
+            const imgUrlDisplay = URL.createObjectURL(image)
+            setImgUrl(imgUrlDisplay)
 
         } catch (error) {
             if (error instanceof z.ZodError) {
@@ -129,19 +101,29 @@ export function ProfileForm() {
     }
 
     async function handleRemoveImage() {
-        setImgUrl('')
-        setBytea(undefined)
         try{
-            const updateProfile = await axiosAuth.patch('/update-profile', {
-                id: session?.user.id,
-                image: null,
-                username: session?.user.username
-            })
+            const IMAGE_LINK = process.env.NEXT_PUBLIC_IMG_LINK
+            const user_id = session?.user.id
+
+            const imageRef = ref(storage, `${IMAGE_LINK}${user_id}`)
+            const deleteFirebaseImg = deleteObject(imageRef)
+
             const updateSession = await update(
                 {...session, 
                 user: {
-                    profile_picture: false
+                    ...session?.user,
+                    profile_picture_url: false
                 }
+            });
+
+            const updateProfile = await axiosAuth.patch('/update-profile', {
+                id: session?.user.id,
+                image: false,
+                username: session?.user.username
+            })
+            setImgUrl('')
+            toast({
+                description: 'Your profile has been updated',
             });
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -171,37 +153,48 @@ export function ProfileForm() {
 
     async function onSubmit(data: ProfileFormValues) {
         try {
-            if (bytea === undefined) {
-                data.image = session?.user.profile_picture
-            } else {
-                data.image = bytea
-            }
-            
+            if (imageToUpload === null) {
+                data.image = false
+            } 
+
             let updatedUser = {
                 ...session?.user,
                 ...(data.username !== '' && { username: data.username}),
-                ...(data.image !== false && { profile_picture: true}),
             };
 
             if (JSON.stringify(updatedUser) === JSON.stringify(session?.user) && typeof data.image === 'boolean') {
                 toast({
+                    variant: "destructive",
                     description: "You haven't made any changes.",
                 });
             } else {
-                const updateProfile = await axiosAuth.patch('/update-profile', {
-                    id: session?.user.id,
-                    image: data.image,
-                    username: data.username
-                })
-
-                const updateSession = await update(
-                    {...session, 
-                    user: {
-                        ...updatedUser,
-                        profile_picture_url: imgUrl
+                if (imageToUpload !== null) {
+                    try {
+                        const imageRef = ref(storage, `AvatarImages/USER_ID_${session?.user.id}`)
+                        const uploadToFirebase = await uploadBytes(imageRef, imageToUpload)
+                        const avatarUrl = await getDownloadURL(imageRef)
+                        firebaseImgUrl = avatarUrl
+                    } catch (error){
+                        console.log(error)
+                        return
                     }
-                });
 
+                    const updatedImage = imageToUpload !== null ? firebaseImgUrl : session?.user.profile_picture_url || false;
+                    
+                    const updateProfile = await axiosAuth.patch('/update-profile', {
+                        id: session?.user.id,
+                        image: updatedImage,
+                        username: data.username
+                    })
+
+                    const updateSession = await update(
+                        {...session, 
+                        user: {
+                            ...updatedUser,
+                            profile_picture_url: updatedImage !== false ? updatedImage : undefined 
+                        }
+                    });
+                }
                 toast({
                     description: 'Your profile has been updated',
                 });
@@ -245,15 +238,15 @@ export function ProfileForm() {
                         className="cursor-pointer"
                         style={{ height: '200px', width: '200px', fontSize: '80px'}}
                         >
-                            {session?.user.profile_picture_url !== undefined && imgUrl === '' && (
-                                <Image src={session.user.profile_picture_url} width={200} height={200} alt=''></Image>
+                            {session?.user.profile_picture_url && imgUrl === '' && (
+                                <Image unoptimized={true} src={session?.user.profile_picture_url} width={200} height={200} alt='avatar Image'></Image>
                             )}
 
                             {imgUrl !== '' &&(
-                                <Image src={imgUrl} alt='' width={200} height={200}></Image>
+                                <Image unoptimized={true} src={imgUrl} alt='' width={200} height={200}></Image>
                             )}
 
-                            {!session?.user.profile_picture && imgUrl === '' && (
+                            {!session?.user.profile_picture_url && imgUrl === '' && (
                                 <AvatarFallback>{session?.user.username.charAt(0)}</AvatarFallback>
                             )}
 

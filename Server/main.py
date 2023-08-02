@@ -19,7 +19,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import json
 from datetime import datetime, timedelta, timezone
 import array
-import base64
 
 
 # Load variables from .env file
@@ -55,7 +54,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(250), nullable=False, unique=True)
     email = db.Column(db.String(250), nullable=False, unique=True)
     password_hash = db.Column(db.String(250), nullable=False)
-    profile_img = db.Column(db.LargeBinary, nullable=True)
+    profile_img = db.Column(db.String(250), nullable=True)
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
     searches = relationship("NumberOfSearches", back_populates="user")
@@ -149,7 +148,7 @@ def handle_login():
                     "email": user.email,
                     "access_token": access_token,
                     "total_searches": 0,
-                    "profile_picture": True if user.profile_img is not None else False
+                    "profile_picture_url": user.profile_img if user.profile_img is not None else False
                 }
                 return response
             else:
@@ -160,7 +159,7 @@ def handle_login():
                     "email": user.email,
                     "access_token": access_token,
                     "total_searches": NumberOfSearches.query.filter_by(user_id=user.id).count(),
-                    "profile_picture": True if user.profile_img is not None else False
+                    "profile_picture_url": user.profile_img if user.profile_img is not None else False
                 }
                 return response
         else:
@@ -213,32 +212,6 @@ def profile():
     return response_dict
 
 
-@app.route('/get-image', methods=['POST'])
-@jwt_required()
-def get_image():
-    # if request.method == 'OPTIONS':
-    #     response = jsonify({'message': 'Preflight request handled'})
-    #     response.headers.add('Access-Control-Allow-Origin', '*')
-    #     response.headers.add('Access-Control-Allow-Methods', 'POST')
-    #     response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-space-app-key')
-    #     return response
-    # else:
-    user_id = request.json.get('id')
-
-    user = User.query.filter_by(id=user_id).first()
-    if user:
-        bytes_data_img = user.profile_img
-        uint_array = array.array('B')
-        uint_array.frombytes(bytes_data_img)
-        base64_data = base64.b64encode(uint_array).decode('utf-8')
-
-        response_body = {
-            'image': base64_data
-        }
-
-        return response_body
-
-
 @app.route('/update-profile', methods=['PATCH'])
 @jwt_required()
 def update_profile():
@@ -246,17 +219,10 @@ def update_profile():
     new_img = request.json.get('image')
     new_username = request.json.get('username').lower()
 
-    uint_array = None
-
-    if new_img is not None and not isinstance(new_img, bool):
-        uint_array = array.array('B', new_img)
-
     user = User.query.filter_by(id=user_id).first()
     if user:
-        user.profile_img = uint_array if (new_img is not None and not isinstance(new_img, bool)) else user.profile_img \
-            if isinstance(new_img, bool) else None
+        user.profile_img = user.profile_img if (new_img == user.profile_img) else None if new_img is False else new_img
         user.username = new_username if new_username != '' else user.username
-
         db.session.commit()
 
         return {'message': 'Updated successfully'}, 200

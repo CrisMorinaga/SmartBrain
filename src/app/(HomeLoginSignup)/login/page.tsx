@@ -1,26 +1,24 @@
 'use client'
+
+import { useToast } from "@/components/shadcn-ui/use-toast"
+import { ToastAction } from "@/components/shadcn-ui/toast";
+import { Signin } from "@/components/Signin/Signin";
+import ProgressBar from "@/components/ProgressBar";
+
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/app/components/shadcn-ui/use-toast"
-import { ToastAction } from "@/app/components/shadcn-ui/toast";
-import { Signin } from "@/app/components/Signin/Signin";
+
+
 
 
 export default function LogIn() {
 
-    const { data: session, status } = useSession()
+    const { data: session } = useSession()
         
     const router = useRouter();
-    const { toast } = useToast()
-    const [ error, setError] = useState(200)
-
-    useEffect(() => {
-        if (session) {
-            router.push(`/profile/${session.user.username}`)
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session])
+    const { toast } = useToast();
+    const [ error, setError] = useState(200);
 
     const catchError = (userDoesntExist: boolean) => {
         if (userDoesntExist) {
@@ -50,7 +48,7 @@ export default function LogIn() {
 
     return (  
         <>{session?.user
-        ? <></>
+        ? <ProgressBar />
         :<div className="Signin">
             <Signin catchError={catchError}/>
         </div>  

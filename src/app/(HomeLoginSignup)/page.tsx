@@ -1,17 +1,18 @@
 'use client'
 
-import { ImageLinkForm } from "../components/(home page)/ImageLinkForm/ImageLinkForm";
-import { Rank } from "../components/(home page)/Rank/Rank";
-import { FaceRecognition } from "../components/(home page)/FaceRecognition/FaceRecognition";
-import React from "react";
+import { ImageLinkForm } from "@/components/(HomePage)/ImageLinkForm/ImageLinkForm";
+import { Rank } from "@/components/(HomePage)/Rank/Rank";
+import { FaceRecognition } from "@/components/(HomePage)/FaceRecognition/FaceRecognition";
+import { ToastAction } from "@/components/shadcn-ui/toast";
+import { toast } from "@/components/shadcn-ui/use-toast";
+import ProgressBar from "@/components/ProgressBar";
+
+import React, { useRef } from "react";
 import { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
-import axios from "@/library/axios";
 import useAxiosAuth from "@/library/hooks/useAxiosAuth";
 import * as z from "zod"
-import { toast } from "../components/shadcn-ui/use-toast";
-import { AxiosError } from "axios";
-import { ToastAction } from "../components/shadcn-ui/toast";
+import axios, { AxiosError } from "axios";
 
 
 type Data = {
@@ -28,16 +29,13 @@ const mySchema = z.object({
     rightCol: z.number()
 })
 
-const IMAGE_API_URL = process.env.NEXT_PUBLIC_IMAGE_API_URL
-
 export default function App() {
 
     const axiosAuth = useAxiosAuth()
-    const { data: session, update } = useSession()
-
-    const [imageUrl, setImageUrl] = useState('');
+    const { data: session, update, status } = useSession()
     const [box, setBox] = useState([]);
     const [error, setError] = useState(false);
+    const imageUrl = useRef('')
 
     let errorHandler = false
 
@@ -45,31 +43,33 @@ export default function App() {
         try{
             const response = await axios({
                 method: "GET",
-                url: IMAGE_API_URL,
+                url: '/api/brain',
                 params: {
                     url: url
                 }
-              })
-            const data: Data[] = response.data;
-            if (data !== undefined) {
-                return data
-            } else {
-                throw new Error('Invalid data')
-            }
+            })
+            return response.data.response
         }
-        catch {
+        catch (error) {
             setError(true)
             errorHandler = true
-            setImageUrl('')
-        }
-    }   
+            if ((error as AxiosError).response?.status === 504) {
+                imageUrl.current = 'timeout'
+                return
+            } else {
+                imageUrl.current = ''
+                return
+            }
+        }   
+    }
 
     const resetUrl = () => {
-        setImageUrl('')
+        imageUrl.current = ''
     }
 
     const setErrorTrue = () => {
         setError(true)
+        imageUrl.current = ''
     }
 
     const setErrorBackToFalse = () => {
@@ -88,14 +88,14 @@ export default function App() {
                 const validationResult = mySchema.safeParse(obj);
                 if (validationResult.success) {
                     const width = image.width;
-                const height = image.height;
+                    const height = image.height;
 
-                return {
-                    leftCol: obj.leftCol * width,
-                    topRow: obj.topRow * height,
-                    rightCol: width - (obj.rightCol * width),
-                    bottomRow: height - (obj.bottomRow * height)
-                }
+                    return {
+                        leftCol: obj.leftCol * width,
+                        topRow: obj.topRow * height,
+                        rightCol: width - (obj.rightCol * width),
+                        bottomRow: height - (obj.bottomRow * height)
+                    }
                 } else {
                     toast({
                         variant: "destructive",
@@ -103,10 +103,10 @@ export default function App() {
                         })
                     setError(true)
                     errorHandler = true
-                    setImageUrl('')
+                    imageUrl.current = ''
+                    }
                 }
-            });
-
+            );
             return positionArray as Data[]
         } else {
 
@@ -128,7 +128,7 @@ export default function App() {
                     })
                 setError(true)
                 errorHandler = true
-                setImageUrl('')
+                imageUrl.current = ''
             }
         }
     }
@@ -138,8 +138,7 @@ export default function App() {
     }
 
     const onSubmit = async (url: string) => {
-        setImageUrl(url)
-
+        imageUrl.current = url
         // Resets box on image
         setBox([])
         try{
@@ -188,6 +187,9 @@ export default function App() {
 
     return ( 
         <>
+            {status === 'loading' && (
+                <ProgressBar />
+            )}
             <div className="App">
                 <div className="mt-5">
                     <Rank />
@@ -198,7 +200,7 @@ export default function App() {
                     error={error}
                     onSubmit={onSubmit}
                     />
-                    <FaceRecognition error={error} box={box} imgUrl={imageUrl}/>
+                    <FaceRecognition error={error} box={box} imageUrl={imageUrl}/>
                 </div>
             </div>  
         </>

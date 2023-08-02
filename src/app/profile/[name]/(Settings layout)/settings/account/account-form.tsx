@@ -1,13 +1,10 @@
 "use client"
 
-import hide from './hide.png'
-import show from './show.png'
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
-import { Button } from "@/app/components/shadcn-ui/button"
+import { Button } from "@/components/shadcn-ui/button"
 import {
     Form,
     FormControl,
@@ -15,15 +12,17 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/app/components/shadcn-ui/form"
-import { Input } from "@/app/components/shadcn-ui/input"
-import { toast } from "@/app/components/shadcn-ui/use-toast"
-import Image from "next/image"
+} from "@/components/shadcn-ui/form"
+import { Input } from "@/components/shadcn-ui/input"
+import { toast } from "@/components/shadcn-ui/use-toast"
+import { ToastAction } from '@/components/shadcn-ui/toast'
+import HideShowPassword from "@/components/HideShowPassword"
+
 import { useRef, useState } from "react"
 import useAxiosAuth from '@/library/hooks/useAxiosAuth'
 import { signOut, useSession } from 'next-auth/react'
 import { AxiosError } from 'axios'
-import { ToastAction } from '@/app/components/shadcn-ui/toast'
+
 
 
 const accountFormSchema = z.object({
@@ -297,12 +296,9 @@ export function AccountForm() {
                         </FormItem>
                     )}
                     />
-                    <Image
-                    height={30}
-                    className="cursor-pointer border rounded bg-white mb-1"
-                    onClick={togglePasswordVisibility} 
-                    src={showPassword ? hide : show} alt=''
-                    />
+                    <div>
+                        <HideShowPassword togglePasswordVisibility={togglePasswordVisibility} showPassword={showPassword}/>
+                    </div>
                 </div>
                 
                 <div className='flex flex-col gap-2'>
