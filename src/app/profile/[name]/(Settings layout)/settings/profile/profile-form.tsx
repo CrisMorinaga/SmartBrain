@@ -234,10 +234,15 @@ export function ProfileForm() {
                     })
                     return
                 } else {
-                    console.log(error)
+                    toast({
+                        variant: "destructive",
+                        title: 'Unable to update your account',
+                        description: "That username is already taken, try with another one.",
+                        })
+                        return
                 }
             } else {
-                console.log(error)
+                return
             }
         }
     }
