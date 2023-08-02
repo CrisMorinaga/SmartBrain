@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/shadcn-ui/skeleton"
+import { ColorRing } from  'react-loader-spinner'
 
 
 export function NavSkeleton() {
@@ -33,5 +34,20 @@ export function ImageSkeleton() {
 
     return (
         <Skeleton className="bg-slate-300 w-full h-full rounded-lg"/>
+    )
+}
+
+export function PageLoading() {
+
+    return (
+        <ColorRing
+        visible={true}
+        height="40"
+        width="40"
+        ariaLabel="blocks-loading"
+        wrapperStyle={{}}   
+        wrapperClass="blocks-wrapper"
+        colors={['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF']}
+        />
     )
 }

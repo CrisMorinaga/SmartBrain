@@ -22,6 +22,7 @@ import { useRef, useState } from "react"
 import useAxiosAuth from '@/library/hooks/useAxiosAuth'
 import { signOut, useSession } from 'next-auth/react'
 import { AxiosError } from 'axios'
+import { PageLoading } from "@/components/Skeletons"
 
 
 
@@ -67,6 +68,11 @@ export function AccountForm() {
         resolver: zodResolver(accountFormSchema),
         defaultValues,
     })
+
+    const [ loading, setLoading ] = useState(false);
+    const handleLoading = async () => {
+        setLoading((prevLoading) => !prevLoading)
+    }
 
     const { data: session, update } = useSession()
     const axiosAuth = useAxiosAuth();
@@ -149,12 +155,12 @@ export function AccountForm() {
             // Avoid sending the form.
             return
         } else {
-
-            const name = (data.lastName?.toLowerCase() || '') + ' ' + (data.firstName?.toLowerCase() || '');
+            const loadingStarts = await handleLoading()
+            const name = (data.lastName?.toLowerCase() || lastName) + ' ' + (data.firstName?.toLowerCase() || firstName);
 
             let updatedUser = {
                 ...session?.user,
-                ...(name.trim() !== '' && { name: name }),
+                ...(name.trim() !== '' && { name: name } ),
                 ...(data.email !== '' && { email: data.email }),
             };
 
@@ -164,25 +170,37 @@ export function AccountForm() {
             }
 
             if ((JSON.stringify(updatedUser) === JSON.stringify(currentUser)) && data.password === '') {
+                const loadingFinishes = await handleLoading()
                 toast({
+                    variant: "destructive",
                     description: "You haven't made any changes.",
                 });
             } else {
 
                 try {
+
                     const updateAccount = await axiosAuth.patch('/update-account', {
                         id: session?.user.id,
-                        firstName: data.firstName,
-                        lastName: data.lastName,
+                        firstName: data.firstName ? data.firstName : firstName,
+                        lastName: data.lastName ? data.lastName : lastName,
                         email: data.email,
                         password: data.password,
                     })
-    
+
+                    const updateSession = await update(
+                        {...session, 
+                        user: {
+                            ...updatedUser,
+                        }
+                    });
+
+                    const loadingFinishes = await handleLoading()
                     toast({
                         description: 'Your account has been updated',
                     });
 
                 } catch (error) {
+                    const loadingFinishes = await handleLoading()
                     if (error instanceof AxiosError) {
                         if (error.response?.data.msg === 'Token has expired') {
                             toast({
@@ -206,7 +224,7 @@ export function AccountForm() {
                             return
                         }
                     } else {
-                        console.log(error)
+                        return
                     }
                 }
             }
@@ -227,7 +245,7 @@ export function AccountForm() {
                             <FormItem>
                                 <FormLabel className="text-white">First Name</FormLabel>
                                 <FormControl>
-                                    <Input placeholder={firstName} {...field} />
+                                    <Input placeholder={firstName ? (firstName.charAt(0).toUpperCase() + firstName.slice(1)) : ''} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -240,7 +258,7 @@ export function AccountForm() {
                             <FormItem>
                                 <FormLabel className="text-white">Last Name</FormLabel>
                                 <FormControl>
-                                    <Input placeholder={lastName} {...field} />
+                                    <Input placeholder={lastName ? (lastName.charAt(0).toUpperCase() + lastName.slice(1)) : ''} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -306,7 +324,12 @@ export function AccountForm() {
                     <p className="text-sm font-medium text-destructive">{passwordsDontMatch ? `The passwords don't match.` : ''}</p>
                 </div>
 
-                <Button className="project-button" type="submit">Update account</Button>
+                <div className="flex flex-row gap-2">
+                    <Button className="project-button" type="submit">Update account</Button>
+                    {loading && (
+                        <PageLoading />
+                    )}
+                </div>
             </form>
         </Form>
     )

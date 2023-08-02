@@ -28,24 +28,28 @@ import { useState } from "react"
 
 import { storage } from "@/firebase/clientApp"
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage"
+import { PageLoading } from "@/components/Skeletons"
 
 const maxFileSize = 1000000;
 
 const FormSchema = z.object({
-
     username: z
             .string()
             .min(2, {message: 'Username must be at least 2 characters.'})
             .max(30, {message: "Username must not be longer than 30 characters."})
             .optional()
             .or(z.literal('')),
-
     image: z.any().optional()
 })
 
 type ProfileFormValues = z.infer<typeof FormSchema>
 
 export function ProfileForm() {
+
+    const [ loading, setLoading ] = useState(false);
+    const handleLoading = async () => {
+        setLoading((prevLoading) => !prevLoading)
+    }
         
     const { data: session, update } = useSession({required:true})
     let firebaseImgUrl = ''
@@ -102,6 +106,8 @@ export function ProfileForm() {
 
     async function handleRemoveImage() {
         try{
+            const loadingStarts = await handleLoading()
+
             const IMAGE_LINK = process.env.NEXT_PUBLIC_IMG_LINK
             const user_id = session?.user.id
 
@@ -123,12 +129,14 @@ export function ProfileForm() {
             })
             if (updateProfile) {
                 setImgUrl('')
+                const loadingFinishes = await handleLoading()
                 toast({
                     description: 'Your profile has been updated',
                 });
             }
             
         } catch (error) {
+            const loadingFinishes = await handleLoading()
             if (error instanceof AxiosError) {
                 if (error.response?.data.msg === 'Token has expired') {
                     toast({
@@ -155,6 +163,8 @@ export function ProfileForm() {
     }
 
     async function onSubmit(data: ProfileFormValues) {
+        const loadingStarts = await handleLoading()
+
         try {
             if (imageToUpload === null) {
                 data.image = false
@@ -166,10 +176,12 @@ export function ProfileForm() {
             };
 
             if (JSON.stringify(updatedUser) === JSON.stringify(session?.user) && typeof data.image === 'boolean') {
+                const loadingFinishes = await handleLoading()
                 toast({
                     variant: "destructive",
                     description: "You haven't made any changes.",
                 });
+
             } else {
                 if (imageToUpload !== null) {
                     try {
@@ -198,12 +210,15 @@ export function ProfileForm() {
                         }
                     });
                 }
+                const loadingFinishes = await handleLoading()
+
                 toast({
                     description: 'Your profile has been updated',
                 });
             }
 
         } catch (error) {
+            const loadingFinishes = await handleLoading()
             if (error instanceof AxiosError) {
                 if (error.response?.data.msg === 'Token has expired') {
                 toast({
@@ -284,7 +299,12 @@ export function ProfileForm() {
                             </FormItem>
                         )}
                     />
-                    <Button className=" project-button" type="submit">Update profile</Button>
+                    <div className="flex flex-row gap-2">
+                        <Button className=" project-button" type="submit">Update profile</Button>
+                        {loading && (
+                            <PageLoading />
+                        )}
+                    </div>
                 </div>
 
             </form>

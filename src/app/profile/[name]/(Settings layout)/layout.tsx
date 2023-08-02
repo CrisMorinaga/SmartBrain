@@ -29,6 +29,11 @@ interface SettingsLayoutProps {
 export default async function Layout({ children }: SettingsLayoutProps) {
 
     const session = await getServerSession(options)
+    let loading = false
+
+    const handleLoading = () => {
+        loading = !loading
+    }
 
     return (
         <html lang="en">

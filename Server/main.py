@@ -236,7 +236,6 @@ def update_profile():
 def update_account():
     first_name = request.json.get('firstName')
     last_name = request.json.get('lastName')
-
     user_id = request.json.get('id')
     new_name = (last_name + ' ' + first_name).lower()
     new_email = request.json.get('email')

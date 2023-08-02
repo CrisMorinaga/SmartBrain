@@ -69,12 +69,14 @@ export default function Navigation({serverSession}: Props) {
     } 
 
     return (
-        <div>
-            {smallScreen ? (
-                <SmallScreenNavBar serverSession={serverSession} handleImageError={handleImageError} handleLogOut={handleLogOut}/>
-            ) : (
-                <BigNavBar serverSession={serverSession} handleImageError={handleImageError} handleLogOut={handleLogOut}/>
-            )}
-        </div>
+        <>
+            <div>
+                {smallScreen ? (
+                    <SmallScreenNavBar serverSession={serverSession} handleImageError={handleImageError} handleLogOut={handleLogOut}/>
+                ) : (
+                    <BigNavBar serverSession={serverSession} handleImageError={handleImageError} handleLogOut={handleLogOut}/>
+                )}
+            </div>
+        </>
     )
 }
