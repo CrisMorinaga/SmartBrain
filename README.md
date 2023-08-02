@@ -22,8 +22,10 @@
   - Instantly detect 1 or more faces in your pictures.
 * Image Gallery
   - Instantly save your images after every search into your gallery to check them whenever you want.
+* Create an account
+  - Save your information in your account and personalize it with your own avatar.
 * Save your search history 
-  - Save your search history information (like URL, date of search, and ranking of the image) into your account for future reference.
+  - Save your search history information (like URL, date of search, and image search ranking) into your account for future reference.
 
 ## How To Use
 
