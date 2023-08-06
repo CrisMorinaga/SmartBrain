@@ -175,13 +175,13 @@ export default function App() {
                             altText="Login"> Login </ToastAction>,
                             })
                         } else {
-                            console.log(error)
+                            return
                         }
                     }
                 }
             }   
         } catch {
-            console.log(`Couldn't proccess url image, please check if the url is correct and try again.`)
+            return
         }
     }
 

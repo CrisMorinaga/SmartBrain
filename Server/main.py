@@ -109,7 +109,8 @@ def register():
     password = request.json.get('password')
 
     username_in_database = User.query.filter_by(username=username).first()
-    if not username_in_database:
+    email_in_database = User.query.filter_by(email=email).first()
+    if not username_in_database and not email_in_database:
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
         new_user = User(name=name, username=username.lower(), email=email, password_hash=hashed_password)
         db.session.add(new_user)
@@ -120,8 +121,10 @@ def register():
             "message": "User created successfully"
         }
         return response, 201
-    else:
+    elif username_in_database:
         return {"message": "That user already exists."}, 409
+    elif email_in_database:
+        return {"message": "That email is already in use."}, 409
 
 
 @app.route("/login", methods=['POST'])

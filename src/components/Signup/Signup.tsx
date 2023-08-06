@@ -21,6 +21,9 @@ import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import axios from "@/library/axios"
 import HideShowPassword from "../HideShowPassword"
+import { PageLoading } from "../Skeletons"
+import { toast } from "../shadcn-ui/use-toast"
+import { AxiosError } from "axios"
 
  
 const formSchema = z.object({
@@ -43,23 +46,23 @@ const formSchema = z.object({
     confirmPassword: z.string(),
 })
 
-type Props = {
-    catchError: () => void
-}
-
-export function Signup({catchError}:Props) {
+export function Signup() {
 
     const [ showPassword, setShowPassword ] = useState(false);
     const [ wrongPasswordLength, setWrongPasswordLength ] = useState(false);
     const [ passwordsDontMatch, setPasswordsDontMatch ] = useState(false);
     const router = useRouter();
 
-
     let password = useRef('')
     let confirmPassword = useRef('')
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword)
+    }
+
+    const [ loading, setLoading ] = useState(false);
+    const handleLoading = async () => {
+        setLoading((prevLoading) => !prevLoading)
     }
 
     function handleChange(event: any) {
@@ -119,7 +122,6 @@ export function Signup({catchError}:Props) {
         }
     }
 
-    // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -132,7 +134,6 @@ export function Signup({catchError}:Props) {
         },
     })
    
-    // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof formSchema>) {
 
         try {
@@ -140,6 +141,8 @@ export function Signup({catchError}:Props) {
                 // Avoid sending the form.
                 return
             } else {
+                const loadingStarts = await handleLoading()
+
                 const register = await axios.post('/register', {
                     firstName: values.firstName,
                     lastName: values.lastName,
@@ -157,15 +160,30 @@ export function Signup({catchError}:Props) {
 
                 if (!result?.error) {
                     router.push(`/profile/${values.username}`)
+                    const loadingFinishes = await handleLoading()
                 }
 
             } 
         } catch (error) {
-            console.log(`error: `, error);
-            catchError();
-            return
+            const loadingFinishes = await handleLoading()
+
+            if(error instanceof AxiosError) {
+                if (error.response?.data.message.includes('email')){
+                    toast({
+                        variant: "destructive",
+                        description: "That email is already taken. Try with another one.",
+                    })
+                    return
+                } else if (error.response?.data.message.includes('user')){
+                    toast({
+                        variant: "destructive",
+                        description: "That username is already taken. Try with another one.",
+                    })
+                    return
+                }
             }
         }
+    }
 
     return (
         <div className="sm:container flex justify-center my-10">
@@ -278,7 +296,12 @@ export function Signup({catchError}:Props) {
                                 <p className="text-sm font-medium text-destructive">{passwordsDontMatch ? `The passwords don't match.` : ''}</p>
                             </div>
 
-                            <Button type="submit">Sign up</Button>
+                            <div className="flex flex-row gap-2">
+                                <Button type="submit">Sign up</Button>
+                                {loading && (
+                                    <PageLoading />
+                                )}
+                            </div>
                         </form>
                     </Form>
                 </div>

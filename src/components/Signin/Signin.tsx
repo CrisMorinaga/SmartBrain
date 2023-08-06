@@ -21,26 +21,30 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 import HideShowPassword from "../HideShowPassword"
+import { PageLoading } from "../Skeletons"
+import { useToast } from "../shadcn-ui/use-toast"
+import { ToastAction } from "../shadcn-ui/toast"
 
  
 const formSchema = z.object({
-    username: z.string(),
-    password: z.string(),
+    username: z.string().min(1, {message: 'Please write your username.'}),
+    password: z.string().min(1, {message: 'Please write your password.'}),
 })
 
-type Props = {
-    catchError: (userDoesntExist: boolean) => void
-}
 
-export function Signin({catchError}: Props) {
+export function Signin() {
+
+    const { toast } = useToast();
 
     const [ showPassword, setShowPassword ] = useState(false);
     const router = useRouter();
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword)
     }
-
-    // 1. Define your form.
+    const [ loading, setLoading ] = useState(false);
+    const handleLoading = async () => {
+        setLoading((prevLoading) => !prevLoading)
+    }
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -50,25 +54,44 @@ export function Signin({catchError}: Props) {
         },
     })
 
-    // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        
-        const result = await signIn("credentials", {
-            username: values.username,
-            password: values.password,
-            redirect:false,
-        });
+        try{
+            const loadingStarts = await handleLoading()
 
-        if (result?.error?.includes('404')) {
-            catchError(true)
-        } else if (result?.error?.includes('401')) {
-            catchError(false)
-            console.log(result.error)
-            console.log('new error')
-        } else {
+            const result = await signIn("credentials", {
+                username: values.username,
+                password: values.password, 
+                redirect:false,
+            });
+
+            if (result?.error?.includes('404')){
+                throw new Error('Error 404')
+            } else if (result?.error?.includes('401')){
+                throw new Error('Error 401')
+            }
+
             router.push(`/profile/${values.username}`)
-        }
-    }      
+            const loadingFinishes = await handleLoading()
+
+        } catch (error: any) {
+            const loadingFinishes = await handleLoading()
+            
+            if (error.message.includes('404')) {
+                toast({
+                    variant: "destructive",
+                    description: "That username / email doesn't exist, maybe you meant register?",
+                    action: <ToastAction 
+                        onClick={() => router.push('/signup')} 
+                        altText="Login"> Register </ToastAction>,
+                })
+            } else if (error.message.includes('401')) {
+                toast({
+                    variant: "destructive",
+                    description: "Incorrect username or password.",
+                })
+            }
+        }  
+    }    
 
     return (
         <div className="container mt-20">
@@ -114,8 +137,13 @@ export function Signin({catchError}: Props) {
                                     <HideShowPassword togglePasswordVisibility={togglePasswordVisibility} showPassword={showPassword}/>
                                 </div>
                             </div>
-                            
-                            <Button type="submit">Login</Button>
+
+                            <div className="flex flex-row gap-2">
+                                <Button type="submit">Login</Button>
+                                {loading && (
+                                    <PageLoading />
+                                )}
+                            </div>
                         </form>
                     </Form>
                 </div>

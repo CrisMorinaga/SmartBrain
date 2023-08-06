@@ -8,13 +8,14 @@ export default function ProfilePage({searchParams} : {
 }) {
 
     const { data: session } = useSession()
+    const username = session?.user.username
 
     return (
         <>
         <div className="bg-project-boxes p-2">
             <h1 className="text-white text-xl text-start cursor-default">
                 {session?.user.total_searches !== 0 ? (
-                    `Welcome back ${session?.user.username} / This is your gallery`
+                    `Welcome back ${username ? username : ''} / This is your gallery`
                     ) : (
                         `Your gallery is empty. Make your first search to start filling it!`
                     )}
