@@ -201,7 +201,6 @@ def handle_ranking():
 def profile():
 
     user_id = request.json.get('id')
-
     searches = NumberOfSearches.query.filter_by(user_id=user_id).all()
     search_list = [search.search_url for search in searches]
     date = [search.date_added for search in searches]

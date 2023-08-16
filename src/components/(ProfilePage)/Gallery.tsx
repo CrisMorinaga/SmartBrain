@@ -23,17 +23,18 @@ export default function Searches({searchParams}: {
     const { data: session } = useSession();
     const axiosAuth = useAxiosAuth();
     const [ data, setData ] = useState<[string, string][]>([]);
+    console.log(data)
 
     // Setting up pagination
     const page = searchParams['page'] ?? '1'
-    const per_page = searchParams['per_page'] ?? '6' 
-    const start = (Number(page) - 1) * Number(per_page)
-    const end = start + Number(per_page)
+    const per_page = 6 
+    const start = (Number(page) - 1) * per_page
+    const end = start + per_page
 
     const images = data.slice(start, end)
+    //
 
     const urlsFetching = async () => {
-
         try {
             const getUrlSearches = await axiosAuth.post('/profile', {
                 id: session?.user.id
@@ -61,7 +62,7 @@ export default function Searches({searchParams}: {
                         })
                         return
                 } else {
-                    console.log(error)
+                    return
                 }
             }
         }
