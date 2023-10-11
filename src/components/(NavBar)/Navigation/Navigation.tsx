@@ -40,7 +40,7 @@ export default function Navigation({serverSession}: Props) {
     async function handleLogOut() {
 
         await axiosAuth.post('/logout')
-        signOut({
+        await signOut({
             redirect:true,
             callbackUrl: '/'
         })

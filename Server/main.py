@@ -32,7 +32,8 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
 CORS(
     app,
     methods=['POST', 'GET', 'PATCH'],
-    origins=['https://smartbrai.netlify.app', 'http://localhost:3000'],
+    origins=['https://smartbrai.netlify.app', 'http://localhost:3000', 'https://smartbrai.vercel.app',
+             'https://smartbrai-flask-server-8e2e2bc1d93d.herokuapp.com'],
     supports_credentials=True,
     allow_headers=['Content-Type', 'Authorization']
 )
