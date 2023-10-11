@@ -55,7 +55,7 @@ Follow this <a href="https://smartbrai.netlify.app/" target="_blank">Link</a>, c
   - Zod (For input validation)
   - Next-auth (For user session management and security)
   - Axios (For increased API calls security and token refreshing)
-  - Shadcn-UI (For UI design)
+  - ShadcnUI (For UI design)
 * Database:
   - PostgreSQL
 * CloudService:
@@ -72,6 +72,7 @@ Made as the final project for the course on Web Development from Zero to Mastery
 ## You may also like...
 
 - [AI Tic-Tac-Toe](https://github.com/CrisMorinaga/Tic-Tac-Toe) - A Tic-Tac-Toe app that uses an AI with 3 levels of difficulty
+- [ChatRoom](https://github.com/CrisMorinaga/ChatRoom) - A chat room built using Flask-Socketio and Next js.
 
 ---
 
