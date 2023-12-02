@@ -76,5 +76,5 @@ Made as the final project for the course on Web Development from Zero to Mastery
 
 ---
 
-> Linkedin [@Cristopher Morales](www.linkedin.com/in/cristopher-morales-c)
+> Linkedin [@Cristopher Morales](https://www.linkedin.com/in/morales-cristopher)
 
